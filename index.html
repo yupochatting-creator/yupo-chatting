@@ -2,250 +2,278 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#087f5b">
-  <meta name="description" content="YUPO Chatting — Connect, chat and share.">
-  <link rel="manifest" href="./manifest.json">
-  <title>YUPO Chatting</title>
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0; font-family: Arial, sans-serif;
-      background: #f2f6f4; color: #172b24;
-    }
-    header {
-      background: #087f5b; color: white; padding: 18px;
-      display: flex; align-items: center; gap: 12px;
-    }
-    .logo {
-      width: 44px; height: 44px; border-radius: 15px;
-      background: white; color: #087f5b;
-      display: grid; place-items: center;
-      font-size: 25px; font-weight: bold;
-    }
-    h1 { margin: 0; font-size: 23px; }
-    header p { margin: 4px 0 0; font-size: 12px; }
-    main { max-width: 650px; margin: auto; padding: 18px; }
-    .hero {
-      background: white; border-radius: 20px; padding: 24px 18px;
-      text-align: center; box-shadow: 0 4px 18px #1231;
-    }
-    .hero h2 { margin: 4px 0 10px; font-size: 28px; }
-    .hero p { color: #64746d; line-height: 1.6; }
-    button, .download {
-      border: 0; border-radius: 12px; padding: 13px 17px;
-      background: #087f5b; color: white; font-weight: bold;
-      font-size: 15px; cursor: pointer; text-decoration: none;
-      display: inline-block;
-    }
-    button:disabled { opacity: .6; }
-    .secondary { background: #e0f3e9; color: #087f5b; }
-    .panel {
-      margin-top: 16px; padding: 18px;
-      border-radius: 17px; background: white;
-    }
-    .panel h3 { margin-top: 0; }
-    input, textarea {
-      width: 100%; padding: 13px; margin: 6px 0 12px;
-      border: 1px solid #d5e2db; border-radius: 10px;
-      font: inherit; background: white;
-    }
-    .chat {
-      display: flex; align-items: center; gap: 12px;
-      padding: 12px 0; border-bottom: 1px solid #edf1ee;
-    }
-    .avatar {
-      width: 43px; height: 43px; flex-shrink: 0;
-      border-radius: 50%; background: #d8f0e2;
-      display: grid; place-items: center; font-size: 21px;
-    }
-    .chat p { margin: 4px 0 0; color: #718078; font-size: 13px; }
-    .note { color: #718078; font-size: 12px; line-height: 1.5; }
-    .status { overflow-wrap: anywhere; line-height: 1.5; }
-    .error { color: #b42318; }
-    .success { color: #087f5b; }
-    footer { text-align: center; padding: 24px; color: #718078; }
-    [hidden] { display: none !important; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#087f5b">
+<link rel="manifest" href="./manifest.json">
+<title>YUPO Chatting</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font:16px Arial;background:#f1f6f3;color:#183329}
+header{background:#087f5b;color:white;padding:17px;display:flex;gap:12px;align-items:center}
+.logo{background:white;color:#087f5b;border-radius:13px;padding:10px;font-size:25px;font-weight:bold}
+main{max-width:650px;margin:auto;padding:14px}
+.panel{background:white;border-radius:15px;padding:16px;margin:12px 0}
+h1,h2,h3,p{margin-top:0}
+input,textarea{width:100%;padding:12px;margin:7px 0;border:1px solid #ccdcd2;border-radius:9px;font:inherit}
+button{border:0;border-radius:9px;padding:12px 15px;background:#087f5b;color:white;font-weight:bold;cursor:pointer}
+.secondary{background:#e0f3e9;color:#087f5b}
+.user{display:flex;justify-content:space-between;align-items:center;gap:10px;border-bottom:1px solid #eee;padding:12px 0;overflow-wrap:anywhere}
+#messages{height:300px;overflow-y:auto;background:#f4f8f5;border-radius:10px;padding:10px;margin:10px 0}
+.msg{background:#dff3e7;padding:9px 12px;border-radius:12px;margin:8px 0;overflow-wrap:anywhere}
+.msg.mine{background:#dcecff;margin-left:20px}
+.small{font-size:12px;color:#687b71;overflow-wrap:anywhere}
+.status{overflow-wrap:anywhere;line-height:1.5}
+.error{color:#b42318}
+[hidden]{display:none!important}
+</style>
 </head>
 <body>
-  <header>
-    <div class="logo">Y</div>
-    <div>
-      <h1>YUPO Chatting</h1>
-      <p>Connect. Chat. Share.</p>
-    </div>
-  </header>
+<header><div class="logo">Y</div><div><h2 style="margin:0">YUPO Chatting</h2><div>Connect. Chat. Share.</div></div></header>
+<main>
+<section class="panel">
+<h2>Welcome to YUPO 💬</h2>
+<p id="status" class="status">Connecting to Firebase…</p>
+</section>
 
-  <main>
-    <section class="hero">
-      <div style="font-size:48px">💬</div>
-      <h2>Your world, connected.</h2>
-      <p>Chat with friends, share moments and stay connected with YUPO.</p>
-      <button onclick="document.getElementById('account').scrollIntoView({behavior:'smooth'})">
-        Get started
-      </button>
-      <p class="note">Create your account to begin.</p>
-    </section>
+<section class="panel" id="account">
+<div id="authForms" hidden>
+<h3>Create account</h3>
+<form id="registerForm">
+<input id="regEmail" type="email" placeholder="Email address" autocomplete="email" required>
+<input id="regPass" type="password" placeholder="Password (6+ characters)" minlength="6" autocomplete="new-password" required>
+<button>Create account</button>
+</form>
+<hr style="border:0;border-top:1px solid #eee;margin:20px 0">
+<h3>Log in</h3>
+<form id="loginForm">
+<input id="loginEmail" type="email" placeholder="Email address" autocomplete="email" required>
+<input id="loginPass" type="password" placeholder="Password" autocomplete="current-password" required>
+<button>Log in</button>
+</form>
+</div>
+<div id="signedIn" hidden>
+<p>Signed in as <b id="myEmail"></b></p>
+<label for="displayName">Your display name</label>
+<input id="displayName" maxlength="40" placeholder="Choose a name">
+<button id="saveProfile">Save name</button>
+<button id="logout" class="secondary">Log out</button>
+</div>
+</section>
 
-    <section class="panel" id="account">
-      <h3>🔐 Your YUPO account</h3>
-      <p id="authStatus" class="status" aria-live="polite">Checking sign-in status…</p>
+<section class="panel" id="directory" hidden>
+<h3>👥 Find people</h3>
+<p class="small">Other registered YUPO users appear here after they sign in and save a display name.</p>
+<div id="users">Loading users…</div>
+</section>
 
-      <div id="authForms" hidden>
-        <form id="registerForm">
-          <h4>Create an account</h4>
-          <label for="registerEmail">Email address</label>
-          <input id="registerEmail" type="email" autocomplete="email"
-                 placeholder="you@example.com" required>
-          <label for="registerPassword">Password (at least 6 characters)</label>
-          <input id="registerPassword" type="password"
-                 autocomplete="new-password" minlength="6" required>
-          <button type="submit">Create account</button>
-        </form>
+<section class="panel" id="chatPanel" hidden>
+<h3 id="chatTitle">Chat</h3>
+<p id="chatStatus" class="small">Messages are visible to members of this conversation.</p>
+<div id="messages" aria-live="polite"></div>
+<form id="sendForm">
+<textarea id="messageText" rows="2" maxlength="4000" placeholder="Write a message…" required></textarea>
+<button id="sendButton">Send message</button>
+<button type="button" id="closeChat" class="secondary">Back to people</button>
+</form>
+</section>
 
-        <hr style="border:0;border-top:1px solid #edf1ee;margin:22px 0">
+<section class="panel">
+<h3>YUPO features</h3>
+<p>✅ Accounts and sign-in</p>
+<p>✅ One-to-one text chat (when database rules are configured correctly)</p>
+<p>⏳ Profile pictures, photos, videos and group chats</p>
+</section>
+</main>
 
-        <form id="loginForm">
-          <h4>Already registered?</h4>
-          <label for="loginEmail">Email address</label>
-          <input id="loginEmail" type="email" autocomplete="email"
-                 placeholder="you@example.com" required>
-          <label for="loginPassword">Password</label>
-          <input id="loginPassword" type="password"
-                 autocomplete="current-password" required>
-          <button type="submit">Log in</button>
-        </form>
-      </div>
+<script type="module">
+import {initializeApp}
+from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+import {
+getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,
+onAuthStateChanged,signOut
+} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+import {
+getFirestore,doc,setDoc,getDoc,collection,query,where,
+onSnapshot,addDoc,serverTimestamp,orderBy,limit
+} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
-      <div id="signedIn" hidden>
-        <p>You are signed in as:</p>
-        <p id="userEmail" style="overflow-wrap:anywhere"></p>
-        <button type="button" class="secondary" id="logoutButton">Log out</button>
-      </div>
-      <p class="note">Use an email address you control. Never share your password.</p>
-    </section>
+const firebaseConfig={
+apiKey:"AIzaSyCwAUlGwXcTlm92QSFWZcKh0mPi7g5CO3Y",
+authDomain:"yupo-chatting.firebaseapp.com",
+projectId:"yupo-chatting",
+storageBucket:"yupo-chatting.firebasestorage.app",
+messagingSenderId:"441870443426",
+appId:"1:441870443426:web:1d4c957d12d8f1252f08fb",
+measurementId:"G-0L70YY0969"
+};
 
-    <section class="panel">
-      <h3>✨ YUPO features</h3>
-      <div class="chat"><div class="avatar">💬</div><div><b>Private chats</b><p>Real messaging is the next development step.</p></div></div>
-      <div class="chat"><div class="avatar">👥</div><div><b>Group conversations</b><p>Planned feature.</p></div></div>
-      <div class="chat"><div class="avatar">📷</div><div><b>Share your moments</b><p>Photo, video and file sharing will be added next.</p></div></div>
-      <div class="chat"><div class="avatar">🎨</div><div><b>Your style</b><p>More profile options coming later.</p></div></div>
-    </section>
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getFirestore(app);
+const $=id=>document.getElementById(id);
 
-    <section class="panel">
-      <h3>📲 Get YUPO for Android</h3>
-      <p>Download the Android app from this website when the APK is published here.</p>
-      <a class="download" id="apkButton" href="#"
-         onclick="alert('The APK download link has not been configured yet.'); return false;">
-         Android app coming soon
-      </a>
-      <p class="note">Install APK files only from sources you trust.</p>
-    </section>
-  </main>
+let currentUser=null;
+let activeChat=null;
+let stopUsers=null;
+let stopMessages=null;
+let openingChat=false;
 
-  <footer>YUPO Chatting · Made to connect</footer>
+function status(message,error=false){
+$("status").textContent=message;
+$("status").className="status"+(error?" error":"");
+}
+function reportError(error){
+console.error(error);
+status("Error: "+(error.code||error.message||"Please try again"),true);
+}
+function stopListeners(){
+if(stopUsers){stopUsers();stopUsers=null}
+if(stopMessages){stopMessages();stopMessages=null}
+}
+function chatIdFor(a,b){return [a,b].sort().join("_")}
 
-  <script type="module">
-    import { initializeApp } from
-      "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-    import {
-      getAuth, createUserWithEmailAndPassword,
-      signInWithEmailAndPassword, onAuthStateChanged, signOut
-    } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+$("registerForm").addEventListener("submit",async e=>{
+e.preventDefault();
+try{
+await createUserWithEmailAndPassword(auth,$("regEmail").value.trim(),$("regPass").value);
+e.target.reset();
+}catch(err){reportError(err)}
+});
+$("loginForm").addEventListener("submit",async e=>{
+e.preventDefault();
+try{
+await signInWithEmailAndPassword(auth,$("loginEmail").value.trim(),$("loginPass").value);
+e.target.reset();
+}catch(err){reportError(err)}
+});
+$("logout").addEventListener("click",async()=>{
+try{stopListeners();activeChat=null;await signOut(auth)}
+catch(err){reportError(err)}
+});
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCwAUlGwXcTlm92QSFWZcKh0mPi7g5CO3Y",
-      authDomain: "yupo-chatting.firebaseapp.com",
-      projectId: "yupo-chatting",
-      storageBucket: "yupo-chatting.firebasestorage.app",
-      messagingSenderId: "441870443426",
-      appId: "1:441870443426:web:1d4c957d12d8f1252f08fb",
-      measurementId: "G-0L70YY0969"
-    };
+$("saveProfile").addEventListener("click",async()=>{
+if(!currentUser)return;
+const name=$("displayName").value.trim().slice(0,40);
+if(!name){status("Please enter a display name.",true);return}
+try{
+await setDoc(doc(db,"users",currentUser.uid),{
+uid:currentUser.uid,email:currentUser.email||"",
+displayName:name,updatedAt:serverTimestamp()
+},{merge:true});
+status("Display name saved.");
+}catch(err){reportError(err)}
+});
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+onAuthStateChanged(auth,async user=>{
+stopListeners();
+currentUser=user;
+activeChat=null;
+$("chatPanel").hidden=true;
+$("directory").hidden=!user;
+$("authForms").hidden=!!user;
+$("signedIn").hidden=!user;
+if(!user){status("Create an account or log in to YUPO.");return}
+$("myEmail").textContent=user.email||"";
+status("Signed in. Loading your profile…");
+try{
+const ref=doc(db,"users",user.uid);
+const snap=await getDoc(ref);
+if(snap.exists())$("displayName").value=snap.data().displayName||"";
+else{
+await setDoc(ref,{
+uid:user.uid,email:user.email||"",displayName:"",
+updatedAt:serverTimestamp()
+});
+}
+status("Signed in. You can find other registered users below.");
+loadUsers();
+}catch(err){reportError(err)}
+});
 
-    const status = document.getElementById("authStatus");
-    const forms = document.getElementById("authForms");
-    const signedIn = document.getElementById("signedIn");
-    const userEmail = document.getElementById("userEmail");
+function loadUsers(){
+if(stopUsers)stopUsers();
+const q=query(collection(db,"users"),limit(100));
+stopUsers=onSnapshot(q,snapshot=>{
+const list=$("users");
+list.replaceChildren();
+let count=0;
+snapshot.forEach(s=>{
+const person=s.data();
+if(s.id===currentUser.uid)return;
+count++;
+const row=document.createElement("div");row.className="user";
+const label=document.createElement("div");
+const name=document.createElement("b");
+name.textContent=person.displayName||"YUPO user";
+const email=document.createElement("div");
+email.className="small";email.textContent=person.email||"";
+label.append(name,email);
+const btn=document.createElement("button");
+btn.textContent="Chat";
+btn.addEventListener("click",()=>openChat(person));
+row.append(label,btn);list.append(row);
+});
+if(!count)list.textContent="No other users yet. Ask a friend to register and save a display name.";
+},reportError);
+}
 
-    function showStatus(message, isError = false) {
-      status.textContent = message;
-      status.className = "status " + (isError ? "error" : "success");
-    }
-
-    function friendlyError(error) {
-      const messages = {
-        "auth/email-already-in-use": "That email already has an account. Please log in.",
-        "auth/invalid-email": "Please enter a valid email address.",
-        "auth/weak-password": "Choose a stronger password with at least 6 characters.",
-        "auth/invalid-credential": "Email or password is incorrect.",
-        "auth/too-many-requests": "Too many attempts. Please wait and try again.",
-        "auth/network-request-failed": "Connection problem. Check your internet and try again.",
-        "auth/operation-not-allowed": "Email/password sign-in is not enabled in Firebase."
-      };
-      return messages[error.code] || "Something went wrong: " + error.message;
-    }
-
-    onAuthStateChanged(auth, user => {
-      forms.hidden = !!user;
-      signedIn.hidden = !user;
-      if (user) {
-        userEmail.textContent = user.email || "Signed-in user";
-        showStatus("You're signed in to YUPO.");
-      } else {
-        showStatus("Create an account or log in to YUPO.");
-      }
-    });
-
-    document.getElementById("registerForm").addEventListener("submit", async e => {
-      e.preventDefault();
-      const button = e.submitter;
-      button.disabled = true;
-      try {
-        await createUserWithEmailAndPassword(
-          auth,
-          document.getElementById("registerEmail").value.trim(),
-          document.getElementById("registerPassword").value
-        );
-        e.target.reset();
-      } catch (error) {
-        showStatus(friendlyError(error), true);
-      } finally {
-        button.disabled = false;
-      }
-    });
-
-    document.getElementById("loginForm").addEventListener("submit", async e => {
-      e.preventDefault();
-      const button = e.submitter;
-      button.disabled = true;
-      try {
-        await signInWithEmailAndPassword(
-          auth,
-          document.getElementById("loginEmail").value.trim(),
-          document.getElementById("loginPassword").value
-        );
-        e.target.reset();
-      } catch (error) {
-        showStatus(friendlyError(error), true);
-      } finally {
-        button.disabled = false;
-      }
-    });
-
-    document.getElementById("logoutButton").addEventListener("click", async () => {
-      try {
-        await signOut(auth);
-      } catch (error) {
-        showStatus(friendlyError(error), true);
-      }
-    });
-  </script>
+async function openChat(person){
+if(openingChat||!currentUser)return;
+openingChat=true;
+try{
+const id=chatIdFor(currentUser.uid,person.uid);
+const ref=doc(db,"chats",id);
+let snap=await getDoc(ref);
+if(!snap.exists()){
+await setDoc(ref,{
+members:[currentUser.uid,person.uid],
+createdAt:serverTimestamp()
+});
+}
+activeChat={id,person};
+$("chatTitle").textContent="Chat with "+(person.displayName||person.email||"YUPO user");
+$("chatPanel").hidden=false;
+$("messages").replaceChildren();
+if(stopMessages)stopMessages();
+const q=query(collection(db,"chats",id,"messages"),
+orderBy("createdAt","asc"),limit(100));
+stopMessages=onSnapshot(q,snapshot=>{
+const box=$("messages");
+box.replaceChildren();
+snapshot.forEach(s=>{
+const m=s.data();
+const bubble=document.createElement("div");
+bubble.className="msg"+(m.senderId===currentUser.uid?" mine":"");
+const who=document.createElement("b");
+who.textContent=m.senderId===currentUser.uid?"You":"Friend";
+const text=document.createElement("div");
+text.textContent=m.text||"";
+bubble.append(who,text);box.append(bubble);
+});
+box.scrollTop=box.scrollHeight;
+},err=>{$("chatStatus").textContent="Could not load messages: "+err.message});
+}catch(err){reportError(err)}
+finally{openingChat=false}
+}
+$("closeChat").addEventListener("click",()=>{
+if(stopMessages){stopMessages();stopMessages=null}
+activeChat=null;$("chatPanel").hidden=true;
+});
+$("sendForm").addEventListener("submit",async e=>{
+e.preventDefault();
+if(!currentUser||!activeChat)return;
+const text=$("messageText").value.trim();
+if(!text)return;
+$("sendButton").disabled=true;
+try{
+await addDoc(collection(db,"chats",activeChat.id,"messages"),{
+senderId:currentUser.uid,text,createdAt:serverTimestamp()
+});
+$("messageText").value="";
+}catch(err){$("chatStatus").textContent="Message not sent: "+err.message}
+finally{$("sendButton").disabled=false}
+});
+</script>
 </body>
 </html>
