@@ -15,9 +15,8 @@
       background: #f2f6f4; color: #172b24;
     }
     header {
-      background: #087f5b; color: white;
-      padding: 18px; display: flex;
-      align-items: center; gap: 12px;
+      background: #087f5b; color: white; padding: 18px;
+      display: flex; align-items: center; gap: 12px;
     }
     .logo {
       width: 44px; height: 44px; border-radius: 15px;
@@ -29,19 +28,18 @@
     header p { margin: 4px 0 0; font-size: 12px; }
     main { max-width: 650px; margin: auto; padding: 18px; }
     .hero {
-      background: white; border-radius: 20px;
-      padding: 24px 18px; text-align: center;
-      box-shadow: 0 4px 18px #1231;
+      background: white; border-radius: 20px; padding: 24px 18px;
+      text-align: center; box-shadow: 0 4px 18px #1231;
     }
     .hero h2 { margin: 4px 0 10px; font-size: 28px; }
     .hero p { color: #64746d; line-height: 1.6; }
     button, .download {
       border: 0; border-radius: 12px; padding: 13px 17px;
-      background: #087f5b; color: white;
-      font-weight: bold; font-size: 15px;
-      cursor: pointer; text-decoration: none;
+      background: #087f5b; color: white; font-weight: bold;
+      font-size: 15px; cursor: pointer; text-decoration: none;
       display: inline-block;
     }
+    button:disabled { opacity: .6; }
     .secondary { background: #e0f3e9; color: #087f5b; }
     .panel {
       margin-top: 16px; padding: 18px;
@@ -53,8 +51,10 @@
       border: 1px solid #d5e2db; border-radius: 10px;
       font: inherit; background: white;
     }
-    .chat { display: flex; align-items: center; gap: 12px;
-      padding: 12px 0; border-bottom: 1px solid #edf1ee; }
+    .chat {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 0; border-bottom: 1px solid #edf1ee;
+    }
     .avatar {
       width: 43px; height: 43px; flex-shrink: 0;
       border-radius: 50%; background: #d8f0e2;
@@ -62,6 +62,9 @@
     }
     .chat p { margin: 4px 0 0; color: #718078; font-size: 13px; }
     .note { color: #718078; font-size: 12px; line-height: 1.5; }
+    .status { overflow-wrap: anywhere; line-height: 1.5; }
+    .error { color: #b42318; }
+    .success { color: #087f5b; }
     footer { text-align: center; padding: 24px; color: #718078; }
     [hidden] { display: none !important; }
   </style>
@@ -80,56 +83,169 @@
       <div style="font-size:48px">💬</div>
       <h2>Your world, connected.</h2>
       <p>Chat with friends, share moments and stay connected with YUPO.</p>
-      <button onclick="showDemo()">Explore YUPO</button>
-      <p class="note">Your new home for conversations.</p>
+      <button onclick="document.getElementById('account').scrollIntoView({behavior:'smooth'})">
+        Get started
+      </button>
+      <p class="note">Create your account to begin.</p>
+    </section>
+
+    <section class="panel" id="account">
+      <h3>🔐 Your YUPO account</h3>
+      <p id="authStatus" class="status" aria-live="polite">Checking sign-in status…</p>
+
+      <div id="authForms" hidden>
+        <form id="registerForm">
+          <h4>Create an account</h4>
+          <label for="registerEmail">Email address</label>
+          <input id="registerEmail" type="email" autocomplete="email"
+                 placeholder="you@example.com" required>
+          <label for="registerPassword">Password (at least 6 characters)</label>
+          <input id="registerPassword" type="password"
+                 autocomplete="new-password" minlength="6" required>
+          <button type="submit">Create account</button>
+        </form>
+
+        <hr style="border:0;border-top:1px solid #edf1ee;margin:22px 0">
+
+        <form id="loginForm">
+          <h4>Already registered?</h4>
+          <label for="loginEmail">Email address</label>
+          <input id="loginEmail" type="email" autocomplete="email"
+                 placeholder="you@example.com" required>
+          <label for="loginPassword">Password</label>
+          <input id="loginPassword" type="password"
+                 autocomplete="current-password" required>
+          <button type="submit">Log in</button>
+        </form>
+      </div>
+
+      <div id="signedIn" hidden>
+        <p>You are signed in as:</p>
+        <p id="userEmail" style="overflow-wrap:anywhere"></p>
+        <button type="button" class="secondary" id="logoutButton">Log out</button>
+      </div>
+      <p class="note">Use an email address you control. Never share your password.</p>
     </section>
 
     <section class="panel">
       <h3>✨ YUPO features</h3>
-      <div class="chat"><div class="avatar">💬</div><div><b>Private chats</b><p>One-to-one conversations</p></div></div>
-      <div class="chat"><div class="avatar">👥</div><div><b>Group conversations</b><p>Keep your friends together</p></div></div>
-      <div class="chat"><div class="avatar">📷</div><div><b>Share your moments</b><p>Photos, videos and files — when enabled</p></div></div>
-      <div class="chat"><div class="avatar">🎨</div><div><b>Your style</b><p>Make YUPO feel like yours</p></div></div>
-    </section>
-
-    <section class="panel" id="demo" hidden>
-      <h3>Try the chat preview</h3>
-      <p class="note">This is a local demo. Messages are not sent to other people.</p>
-      <div id="messages"></div>
-      <form id="messageForm">
-        <label for="message">Write a test message</label>
-        <textarea id="message" rows="2" placeholder="Type a message..." required></textarea>
-        <button type="submit">Add message</button>
-      </form>
+      <div class="chat"><div class="avatar">💬</div><div><b>Private chats</b><p>Real messaging is the next development step.</p></div></div>
+      <div class="chat"><div class="avatar">👥</div><div><b>Group conversations</b><p>Planned feature.</p></div></div>
+      <div class="chat"><div class="avatar">📷</div><div><b>Share your moments</b><p>Photo, video and file sharing will be added next.</p></div></div>
+      <div class="chat"><div class="avatar">🎨</div><div><b>Your style</b><p>More profile options coming later.</p></div></div>
     </section>
 
     <section class="panel">
       <h3>📲 Get YUPO for Android</h3>
-      <p>Our Android app download will be available here after the APK is built and uploaded.</p>
-      <a class="download" id="apkButton" href="#" onclick="alert('The Android APK is not ready yet. Complete the Android build before downloading.'); return false;">Android app coming soon</a>
-      <p class="note">Never install an APK from an untrusted source.</p>
+      <p>Download the Android app from this website when the APK is published here.</p>
+      <a class="download" id="apkButton" href="#"
+         onclick="alert('The APK download link has not been configured yet.'); return false;">
+         Android app coming soon
+      </a>
+      <p class="note">Install APK files only from sources you trust.</p>
     </section>
   </main>
 
   <footer>YUPO Chatting · Made to connect</footer>
 
-  <script>
-    function showDemo() {
-      const section = document.getElementById("demo");
-      section.hidden = false;
-      section.scrollIntoView({ behavior: "smooth" });
+  <script type="module">
+    import { initializeApp } from
+      "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import {
+      getAuth, createUserWithEmailAndPassword,
+      signInWithEmailAndPassword, onAuthStateChanged, signOut
+    } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCwAUlGwXcTlm92QSFWZcKh0mPi7g5CO3Y",
+      authDomain: "yupo-chatting.firebaseapp.com",
+      projectId: "yupo-chatting",
+      storageBucket: "yupo-chatting.firebasestorage.app",
+      messagingSenderId: "441870443426",
+      appId: "1:441870443426:web:1d4c957d12d8f1252f08fb",
+      measurementId: "G-0L70YY0969"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    const status = document.getElementById("authStatus");
+    const forms = document.getElementById("authForms");
+    const signedIn = document.getElementById("signedIn");
+    const userEmail = document.getElementById("userEmail");
+
+    function showStatus(message, isError = false) {
+      status.textContent = message;
+      status.className = "status " + (isError ? "error" : "success");
     }
 
-    document.getElementById("messageForm").addEventListener("submit", function(e) {
+    function friendlyError(error) {
+      const messages = {
+        "auth/email-already-in-use": "That email already has an account. Please log in.",
+        "auth/invalid-email": "Please enter a valid email address.",
+        "auth/weak-password": "Choose a stronger password with at least 6 characters.",
+        "auth/invalid-credential": "Email or password is incorrect.",
+        "auth/too-many-requests": "Too many attempts. Please wait and try again.",
+        "auth/network-request-failed": "Connection problem. Check your internet and try again.",
+        "auth/operation-not-allowed": "Email/password sign-in is not enabled in Firebase."
+      };
+      return messages[error.code] || "Something went wrong: " + error.message;
+    }
+
+    onAuthStateChanged(auth, user => {
+      forms.hidden = !!user;
+      signedIn.hidden = !user;
+      if (user) {
+        userEmail.textContent = user.email || "Signed-in user";
+        showStatus("You're signed in to YUPO.");
+      } else {
+        showStatus("Create an account or log in to YUPO.");
+      }
+    });
+
+    document.getElementById("registerForm").addEventListener("submit", async e => {
       e.preventDefault();
-      const input = document.getElementById("message");
-      const bubble = document.createElement("div");
-      bubble.className = "chat";
-      bubble.textContent = input.value;
-      document.getElementById("messages").appendChild(bubble);
-      input.value = "";
+      const button = e.submitter;
+      button.disabled = true;
+      try {
+        await createUserWithEmailAndPassword(
+          auth,
+          document.getElementById("registerEmail").value.trim(),
+          document.getElementById("registerPassword").value
+        );
+        e.target.reset();
+      } catch (error) {
+        showStatus(friendlyError(error), true);
+      } finally {
+        button.disabled = false;
+      }
+    });
+
+    document.getElementById("loginForm").addEventListener("submit", async e => {
+      e.preventDefault();
+      const button = e.submitter;
+      button.disabled = true;
+      try {
+        await signInWithEmailAndPassword(
+          auth,
+          document.getElementById("loginEmail").value.trim(),
+          document.getElementById("loginPassword").value
+        );
+        e.target.reset();
+      } catch (error) {
+        showStatus(friendlyError(error), true);
+      } finally {
+        button.disabled = false;
+      }
+    });
+
+    document.getElementById("logoutButton").addEventListener("click", async () => {
+      try {
+        await signOut(auth);
+      } catch (error) {
+        showStatus(friendlyError(error), true);
+      }
     });
   </script>
 </body>
-        </html>
-        
+</html>
