@@ -1,0 +1,19 @@
+
+{
+  "name": "YUPO Chatting",
+  "short_name": "YUPO",
+  "description": "Connect, chat and share with YUPO.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f2f6f4",
+  "theme_color": "#087f5b",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
