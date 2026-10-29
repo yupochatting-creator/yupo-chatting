@@ -1,0 +1,40 @@
+
+name: Build YUPO Android APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download YUPO website
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Build YUPO APK with Bubblewrap
+        run: |
+          npm install -g @bubblewrap/cli
+          mkdir yupo-android
+          cd yupo-android
+          bubblewrap init --manifest https://${{ github.repository_owner }}.github.io/yupo-chatting/manifest.json --directory .
+          yes "" | bubblewrap update || true
+          yes "" | bubblewrap build || true
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: yupo-android-apk
+          path: |
+            yupo-android/**/*.apk
+          if-no-files-found: error
+          
