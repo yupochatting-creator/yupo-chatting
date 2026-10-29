@@ -1,16 +1,27 @@
-
 name: Build YUPO Android APK
 
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
-  build-apk:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Download YUPO website
+      - name: Checkout YUPO website
         uses: actions/checkout@v4
+        with:
+          path: yupo-site
+
+      - name: Get Android WebView template
+        uses: actions/checkout@v4
+        with:
+          repository: xchacha20-poly1305/webview-apk-template
+          ref: dev
+          path: android-wrapper
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -18,23 +29,33 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Build YUPO APK with Bubblewrap
+      - name: Install icon tools
         run: |
-          npm install -g @bubblewrap/cli
-          mkdir yupo-android
-          cd yupo-android
-          bubblewrap init --manifest https://${{ github.repository_owner }}.github.io/yupo-chatting/manifest.json --directory .
-          yes "" | bubblewrap update || true
-          yes "" | bubblewrap build || true
+          sudo apt-get update
+          sudo apt-get install -y imagemagick libxml2-utils
+
+      - name: Configure YUPO
+        working-directory: android-wrapper
+        env:
+          OWNER: ${{ github.repository_owner }}
+        run: |
+          printf 'app.url=https://%s.github.io/yupo-chatting/\napp.package=com.yupo.chatting\napp.name=YUPO Chatting\napp.icon_url=https://%s.github.io/yupo-chatting/icon.svg\n' "$OWNER" "$OWNER" > app.properties
+          cat app.properties
+
+      - name: Build debug APK
+        working-directory: android-wrapper
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Verify APK
+        run: |
+          test -f android-wrapper/app/build/outputs/apk/debug/app-debug.apk
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: yupo-android-apk
-          path: |
-            yupo-android/**/*.apk
+          path: android-wrapper/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           
