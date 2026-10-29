@@ -1,0 +1,135 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#087f5b">
+  <meta name="description" content="YUPO Chatting — Connect, chat and share.">
+  <link rel="manifest" href="./manifest.json">
+  <title>YUPO Chatting</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; font-family: Arial, sans-serif;
+      background: #f2f6f4; color: #172b24;
+    }
+    header {
+      background: #087f5b; color: white;
+      padding: 18px; display: flex;
+      align-items: center; gap: 12px;
+    }
+    .logo {
+      width: 44px; height: 44px; border-radius: 15px;
+      background: white; color: #087f5b;
+      display: grid; place-items: center;
+      font-size: 25px; font-weight: bold;
+    }
+    h1 { margin: 0; font-size: 23px; }
+    header p { margin: 4px 0 0; font-size: 12px; }
+    main { max-width: 650px; margin: auto; padding: 18px; }
+    .hero {
+      background: white; border-radius: 20px;
+      padding: 24px 18px; text-align: center;
+      box-shadow: 0 4px 18px #1231;
+    }
+    .hero h2 { margin: 4px 0 10px; font-size: 28px; }
+    .hero p { color: #64746d; line-height: 1.6; }
+    button, .download {
+      border: 0; border-radius: 12px; padding: 13px 17px;
+      background: #087f5b; color: white;
+      font-weight: bold; font-size: 15px;
+      cursor: pointer; text-decoration: none;
+      display: inline-block;
+    }
+    .secondary { background: #e0f3e9; color: #087f5b; }
+    .panel {
+      margin-top: 16px; padding: 18px;
+      border-radius: 17px; background: white;
+    }
+    .panel h3 { margin-top: 0; }
+    input, textarea {
+      width: 100%; padding: 13px; margin: 6px 0 12px;
+      border: 1px solid #d5e2db; border-radius: 10px;
+      font: inherit; background: white;
+    }
+    .chat { display: flex; align-items: center; gap: 12px;
+      padding: 12px 0; border-bottom: 1px solid #edf1ee; }
+    .avatar {
+      width: 43px; height: 43px; flex-shrink: 0;
+      border-radius: 50%; background: #d8f0e2;
+      display: grid; place-items: center; font-size: 21px;
+    }
+    .chat p { margin: 4px 0 0; color: #718078; font-size: 13px; }
+    .note { color: #718078; font-size: 12px; line-height: 1.5; }
+    footer { text-align: center; padding: 24px; color: #718078; }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">Y</div>
+    <div>
+      <h1>YUPO Chatting</h1>
+      <p>Connect. Chat. Share.</p>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div style="font-size:48px">💬</div>
+      <h2>Your world, connected.</h2>
+      <p>Chat with friends, share moments and stay connected with YUPO.</p>
+      <button onclick="showDemo()">Explore YUPO</button>
+      <p class="note">Your new home for conversations.</p>
+    </section>
+
+    <section class="panel">
+      <h3>✨ YUPO features</h3>
+      <div class="chat"><div class="avatar">💬</div><div><b>Private chats</b><p>One-to-one conversations</p></div></div>
+      <div class="chat"><div class="avatar">👥</div><div><b>Group conversations</b><p>Keep your friends together</p></div></div>
+      <div class="chat"><div class="avatar">📷</div><div><b>Share your moments</b><p>Photos, videos and files — when enabled</p></div></div>
+      <div class="chat"><div class="avatar">🎨</div><div><b>Your style</b><p>Make YUPO feel like yours</p></div></div>
+    </section>
+
+    <section class="panel" id="demo" hidden>
+      <h3>Try the chat preview</h3>
+      <p class="note">This is a local demo. Messages are not sent to other people.</p>
+      <div id="messages"></div>
+      <form id="messageForm">
+        <label for="message">Write a test message</label>
+        <textarea id="message" rows="2" placeholder="Type a message..." required></textarea>
+        <button type="submit">Add message</button>
+      </form>
+    </section>
+
+    <section class="panel">
+      <h3>📲 Get YUPO for Android</h3>
+      <p>Our Android app download will be available here after the APK is built and uploaded.</p>
+      <a class="download" id="apkButton" href="#" onclick="alert('The Android APK is not ready yet. Complete the Android build before downloading.'); return false;">Android app coming soon</a>
+      <p class="note">Never install an APK from an untrusted source.</p>
+    </section>
+  </main>
+
+  <footer>YUPO Chatting · Made to connect</footer>
+
+  <script>
+    function showDemo() {
+      const section = document.getElementById("demo");
+      section.hidden = false;
+      section.scrollIntoView({ behavior: "smooth" });
+    }
+
+    document.getElementById("messageForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const input = document.getElementById("message");
+      const bubble = document.createElement("div");
+      bubble.className = "chat";
+      bubble.textContent = input.value;
+      document.getElementById("messages").appendChild(bubble);
+      input.value = "";
+    });
+  </script>
+</body>
+        </html>
+        
