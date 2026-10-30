@@ -14,6 +14,13 @@ jobs:
       - name: Checkout website
         uses: actions/checkout@v4
 
+      - name: Check website files
+        run: |
+          echo "Repository files:"
+          ls -la
+          echo "Checking icon:"
+          test -f ./icon.png || (echo "ERROR: icon.png is missing from the checked-out commit" && exit 1)
+
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
@@ -23,12 +30,12 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Prepare Android project
+      - name: Create Android project
         run: |
           mkdir -p app/src/main/java/com/yupo/chatting
           mkdir -p app/src/main/res/drawable-nodpi
 
-          cp icon.png app/src/main/res/drawable-nodpi/ic_launcher.png
+          cp ./icon.png app/src/main/res/drawable-nodpi/ic_launcher.png
 
           cat > settings.gradle <<'EOF'
           pluginManagement {
@@ -121,11 +128,11 @@ jobs:
           }
           EOF
 
-          gradle --no-daemon assembleDebug
+      - name: Build Android APK
+        run: gradle --no-daemon assembleDebug
 
       - name: Verify APK
-        run: |
-          test -f app/build/outputs/apk/debug/app-debug.apk
+        run: test -f app/build/outputs/apk/debug/app-debug.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
