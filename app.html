@@ -2,54 +2,73 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#087f5b">
-<title>YUPO Chatting App</title>
+<title>YUPO Chatting</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;background:#edf3f0;color:#183329}
-header{background:#087f5b;color:white;padding:16px;font-size:21px;font-weight:bold}
-header small{display:block;font-size:12px;font-weight:normal;margin-top:4px}
-main{max-width:650px;margin:auto;padding:12px}
-.panel{background:white;border-radius:13px;padding:16px;margin:12px 0;box-shadow:0 2px 9px #0000000b}
-h2,h3{margin-top:0}
-input,textarea{width:100%;padding:13px;border:1px solid #ccdcd2;border-radius:9px;margin:7px 0 12px;font:inherit}
-button{border:0;border-radius:9px;padding:12px 15px;background:#087f5b;color:white;font:inherit;cursor:pointer}
-button:disabled{opacity:.5}
-.secondary{background:#e2f2e9;color:#087f5b}
-.danger{background:#b83a3a}
-.tabs,.row{display:flex;gap:8px}
-.tabs button,.row button{flex:1}
-.muted,.small{color:#718078;font-size:13px}
-.status{font-size:13px;min-height:18px;color:#087f5b;overflow-wrap:anywhere}
-.hidden{display:none!important}
-[hidden]{display:none!important}
-.person{display:flex;align-items:center;gap:11px;padding:12px 2px;border-bottom:1px solid #edf1ee}
-.avatar{width:46px;height:46px;border-radius:50%;object-fit:cover;background:#dceee4;display:grid;place-items:center;color:#087f5b;font-weight:bold;flex-shrink:0}
-.person-info{flex:1;min-width:0}
-.person-info strong{display:block}
-.person-info small{color:#718078}
-#messages{height:52vh;min-height:260px;overflow-y:auto;background:#edf4ef;border-radius:10px;padding:12px;margin:12px 0}
-.bubble{max-width:85%;width:fit-content;padding:10px 12px;margin:8px 0;border-radius:12px;background:white;overflow-wrap:anywhere}
-.mine{margin-left:auto;background:#d5f5df}
-.bubble small{display:block;color:#718078;font-size:10px;margin-top:5px;text-align:right}
-.send-row{display:flex;gap:8px;align-items:center}
-.send-row input{margin:0;min-width:0}
-.send-row button{flex-shrink:0}
-.profile-photo{width:80px;height:80px;border-radius:50%;object-fit:cover;background:#e2f2e9;display:block;margin:10px 0}
+body{margin:0;background:#f4f7f5;color:#183329;font-family:Arial,sans-serif}
+button,input{font:inherit}
+button{cursor:pointer;border:0}
+.hidden,[hidden]{display:none!important}
+#app{max-width:650px;margin:auto;min-height:100vh;background:#fff;position:relative;padding-bottom:76px}
+.topbar{background:#087f5b;color:white;padding:17px 16px;position:sticky;top:0;z-index:5}
+.topline{display:flex;align-items:center;justify-content:space-between}
+.brand{font-size:23px;font-weight:bold}
+.top-actions{display:flex;gap:15px;font-size:21px}
+.subtitle{font-size:12px;margin-top:4px;opacity:.85}
+.page{padding:15px}
+.page-title{font-size:22px;margin:5px 0 15px}
+.search{width:100%;padding:13px 16px;border:0;border-radius:25px;background:#edf3ef;margin-bottom:13px;outline:none}
+.person{display:flex;align-items:center;gap:12px;padding:12px 5px;border-bottom:1px solid #edf1ee;cursor:pointer}
+.avatar{width:49px;height:49px;border-radius:50%;object-fit:cover;background:#dceee4;display:grid;place-items:center;color:#087f5b;font-weight:bold;flex-shrink:0}
+.info{flex:1;min-width:0}
+.info strong{display:block;font-size:15px}
+.info small{display:block;color:#7b8981;font-size:12px;margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.arrow{color:#087f5b;font-size:19px}
+.bottomnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:650px;background:white;border-top:1px solid #e7eee9;display:flex;justify-content:space-around;padding:9px 4px calc(9px + env(safe-area-inset-bottom));z-index:10}
+.navbtn{background:transparent;color:#84918a;flex:1;padding:5px 2px;font-size:11px}
+.navbtn span{display:block;font-size:21px;margin-bottom:4px}
+.navbtn.active{color:#087f5b;font-weight:bold}
+.panel{background:white;padding:17px;border-radius:14px;margin-bottom:13px}
+input{width:100%;padding:13px;border:1px solid #dce7e0;border-radius:10px;margin:7px 0 13px;outline-color:#087f5b}
+.primary{background:#087f5b;color:white;padding:13px 17px;border-radius:10px}
+.secondary{background:#e3f3e9;color:#087f5b;padding:12px 15px;border-radius:10px}
+.danger{background:#b83a3a;color:white;padding:12px 15px;border-radius:10px}
+.status{color:#087f5b;font-size:13px;min-height:18px;overflow-wrap:anywhere}
+.muted{color:#829088;font-size:13px}
+#authScreen{max-width:430px;margin:50px auto;padding:20px}
+#authScreen h1{color:#087f5b;text-align:center;font-size:32px}
+.authbox{background:white;padding:22px;border-radius:17px;box-shadow:0 3px 18px #0000000c}
+.auth-tabs{display:flex;gap:8px;margin-bottom:15px}
+.auth-tabs button{flex:1}
+#chatScreen{position:fixed;inset:0;z-index:20;background:#edf4ef;max-width:650px;margin:auto;display:flex;flex-direction:column}
+.chathead{background:#087f5b;color:white;padding:13px;display:flex;align-items:center;gap:12px}
+.chathead button{background:transparent;color:white;font-size:22px}
+.chathead .avatar{width:42px;height:42px}
+.chathead strong{display:block}
+.chathead small{font-size:11px;opacity:.8}
+#messages{flex:1;overflow-y:auto;padding:14px;background:#edf4ef}
+.bubble{max-width:82%;width:fit-content;background:white;padding:10px 12px;margin:8px 0;border-radius:13px;overflow-wrap:anywhere;box-shadow:0 1px 2px #0000000b}
+.mine{margin-left:auto;background:#d4f4df}
+.bubble small{display:block;text-align:right;color:#829088;font-size:10px;margin-top:5px}
+.sendbox{background:white;padding:10px;display:flex;gap:8px;padding-bottom:calc(10px + env(safe-area-inset-bottom))}
+.sendbox input{margin:0;border-radius:25px;min-width:0}
+.sendbox button{border-radius:50%;width:47px;flex-shrink:0}
+.profile-photo{width:95px;height:95px;border-radius:50%;object-fit:cover;background:#e3f3e9}
+.profile-center{text-align:center;padding:15px}
+.profile-center img{margin:auto}
+.call-icon{font-size:25px;color:#087f5b}
 </style>
 </head>
 <body>
-<header>
-YUPO Chatting
-<small>Connect. Chat. Stay in touch.</small>
-</header>
 
-<main>
-<section id="authPanel" class="panel">
-<h2>Welcome to YUPO 💬</h2>
-<div class="tabs">
-<button id="loginTab">Login</button>
+<section id="authScreen">
+<h1>YUPO 💬</h1>
+<p style="text-align:center;color:#718078">Connect. Chat. Stay in touch.</p>
+<div class="authbox">
+<div class="auth-tabs">
+<button id="loginTab" class="primary">Login</button>
 <button id="registerTab" class="secondary">Register</button>
 </div>
 <form id="authForm">
@@ -58,53 +77,94 @@ YUPO Chatting
 <label>Password</label>
 <input id="password" type="password" minlength="6" placeholder="At least 6 characters" required>
 <div id="nameField" class="hidden">
-<label>Display name</label>
+<label>Your display name</label>
 <input id="displayName" maxlength="40" placeholder="Your name">
 </div>
-<button id="authButton" type="submit" style="width:100%">Login</button>
+<button id="authButton" class="primary" style="width:100%">Login</button>
 </form>
 <p id="authStatus" class="status"></p>
+</div>
 </section>
 
-<section id="mainPanel" class="hidden">
+<div id="app" class="hidden">
+<header class="topbar">
+<div class="topline">
+<div class="brand">YUPO</div>
+<div class="top-actions"><span>⌕</span><span>⋮</span></div>
+</div>
+<div class="subtitle">Connect. Chat. Stay in touch.</div>
+</header>
+
+<section id="chatsPage" class="page">
+<h2 class="page-title">Chats</h2>
+<input id="chatSearch" class="search" placeholder="⌕  Search conversations">
+<div id="chatList"><p class="muted">Loading conversations...</p></div>
+</section>
+
+<section id="peoplePage" class="page hidden">
+<h2 class="page-title">People</h2>
+<p class="muted">Find people and start a conversation.</p>
+<input id="peopleSearch" class="search" placeholder="⌕  Search by name or email">
+<div id="peopleList"><p class="muted">Loading people...</p></div>
+</section>
+
+<section id="callsPage" class="page hidden">
+<h2 class="page-title">Calls</h2>
 <div class="panel">
-<strong id="welcomeText">Welcome</strong>
-<p class="muted">Your YUPO account</p>
-<button id="profileToggle" class="secondary">My profile</button>
-<button id="logoutButton" class="danger">Logout</button>
-<div id="profileArea" class="hidden" style="margin-top:15px">
+<div style="font-size:42px;text-align:center">📞</div>
+<h3 style="text-align:center">YUPO Voice Calls</h3>
+<p class="muted" style="text-align:center">Voice calling is coming soon. Real calls need microphone permission and call connection technology.</p>
+</div>
+</section>
+
+<section id="settingsPage" class="page hidden">
+<h2 class="page-title">Settings</h2>
+<div class="panel profile-center">
 <img id="profilePreview" class="profile-photo" alt="Profile picture" hidden>
+<h3 id="settingsName">My account</h3>
+<p id="settingsEmail" class="muted"></p>
+</div>
+<div class="panel">
+<h3>Edit profile</h3>
 <label>Choose profile picture</label>
 <input id="photoFile" type="file" accept="image/*">
 <label>Display name</label>
 <input id="myName" maxlength="40" placeholder="Your display name">
-<button id="saveProfile">Save profile</button>
+<button id="saveProfile" class="primary">Save profile</button>
 <p id="profileStatus" class="status"></p>
 </div>
-</div>
-
-<div class="panel" id="homePanel">
-<h2>Messages</h2>
-<label>Find people</label>
-<input id="peopleSearch" placeholder="Search by name or email">
-<div id="peopleList"><p class="muted">Loading people...</p></div>
-<hr style="border:0;border-top:1px solid #edf1ee;margin:18px 0">
-<h2>Your conversations</h2>
-<div id="chatList"><p class="muted">Loading conversations...</p></div>
-</div>
-
-<div class="panel hidden" id="chatPanel">
-<button id="backButton" class="secondary">← Back</button>
-<h2 id="chatTitle" style="margin-top:15px">Conversation</h2>
-<div id="messages"></div>
-<form id="sendForm" class="send-row">
-<input id="messageInput" maxlength="4000" placeholder="Write a message..." autocomplete="off" required>
-<button id="sendButton" type="submit">Send</button>
-</form>
-<p id="chatStatus" class="status"></p>
+<div class="panel">
+<h3>About YUPO</h3>
+<p class="muted">YUPO Chatting — Connect. Chat. Stay in touch.</p>
+<button id="logoutButton" class="danger">Logout</button>
 </div>
 </section>
-</main>
+
+<nav class="bottomnav">
+<button class="navbtn active" data-page="chatsPage"><span>▣</span>Chats</button>
+<button class="navbtn" data-page="peoplePage"><span>♙</span>People</button>
+<button class="navbtn" data-page="callsPage"><span>☎</span>Calls</button>
+<button class="navbtn" data-page="settingsPage"><span>⚙</span>Settings</button>
+</nav>
+</div>
+
+<section id="chatScreen" class="hidden">
+<div class="chathead">
+<button id="backButton">‹</button>
+<div id="chatAvatar"></div>
+<div style="flex:1;min-width:0">
+<strong id="chatTitle">Conversation</strong>
+<small>YUPO Chat</small>
+</div>
+<span style="font-size:22px">☎</span>
+</div>
+<div id="messages"></div>
+<form id="sendForm" class="sendbox">
+<input id="messageInput" maxlength="4000" placeholder="Write a message..." autocomplete="off" required>
+<button id="sendButton" class="primary" type="submit">➤</button>
+</form>
+<p id="chatStatus" class="status" style="background:white;padding:0 12px"></p>
+</section>
 
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
@@ -126,27 +186,14 @@ const auth=getAuth(app);
 const db=getFirestore(app);
 const $=id=>document.getElementById(id);
 
-let currentUser=null;
-let myProfile={};
-let selectedPerson=null;
-let selectedChatId=null;
-let isRegister=false;
-let peopleData=[];
-let stopPeople=null;
-let stopChats=null;
-let stopMessages=null;
-let pendingPhoto="";
+let currentUser=null,myProfile={},selectedPerson=null,selectedChatId=null;
+let isRegister=false,peopleData=[],stopPeople=null,stopChats=null,stopMessages=null,pendingPhoto="";
+let chatsData=[];
 
 function status(id,message){$(id).textContent=message}
-function safe(value){
- return String(value||"").replace(/[&<>"']/g,c=>({
- "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
- }[c]));
-}
+function safe(value){return String(value||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function avatar(person){
- if(person.photoUrl){
-  return `<img class="avatar" src="${safe(person.photoUrl)}" alt="">`;
- }
+ if(person.photoUrl)return `<img class="avatar" src="${safe(person.photoUrl)}" alt="">`;
  return `<div class="avatar">${safe((person.displayName||person.email||"?").charAt(0).toUpperCase())}</div>`;
 }
 function chatId(a,b){return[a,b].sort().join("_")}
@@ -158,12 +205,18 @@ function cleanup(){
  stopPeople=stopChats=stopMessages=null;
 }
 
+function showPage(page){
+ ["chatsPage","peoplePage","callsPage","settingsPage"].forEach(id=>$(id).classList.toggle("hidden",id!==page));
+ document.querySelectorAll(".navbtn").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
+}
+document.querySelectorAll(".navbtn").forEach(b=>b.onclick=()=>showPage(b.dataset.page));
+
 function setAuthMode(register){
  isRegister=register;
  $("nameField").classList.toggle("hidden",!register);
  $("authButton").textContent=register?"Create account":"Login";
- $("loginTab").className=register?"secondary":"";
- $("registerTab").className=register?"":"secondary";
+ $("loginTab").className=register?"secondary":"primary";
+ $("registerTab").className=register?"primary":"secondary";
  status("authStatus","");
 }
 $("loginTab").onclick=()=>setAuthMode(false);
@@ -171,8 +224,7 @@ $("registerTab").onclick=()=>setAuthMode(true);
 
 $("authForm").addEventListener("submit",async e=>{
  e.preventDefault();
- const email=$("email").value.trim();
- const password=$("password").value;
+ const email=$("email").value.trim(),password=$("password").value;
  try{
   $("authButton").disabled=true;
   status("authStatus","Please wait...");
@@ -181,20 +233,11 @@ $("authForm").addEventListener("submit",async e=>{
    if(!name)throw Error("Please enter your display name.");
    const result=await createUserWithEmailAndPassword(auth,email,password);
    await setDoc(doc(db,"users",result.user.uid),{
-    uid:result.user.uid,
-    email,
-    displayName:name,
-    photoUrl:"",
-    createdAt:serverTimestamp()
+    uid:result.user.uid,email,displayName:name,photoUrl:"",createdAt:serverTimestamp()
    });
-  }else{
-   await signInWithEmailAndPassword(auth,email,password);
-  }
- }catch(err){
-  status("authStatus",err.message);
- }finally{
-  $("authButton").disabled=false;
- }
+  }else await signInWithEmailAndPassword(auth,email,password);
+ }catch(err){status("authStatus",err.message)}
+ finally{$("authButton").disabled=false}
 });
 
 function compressImage(file){
@@ -210,12 +253,8 @@ function compressImage(file){
     canvas.width=Math.max(1,Math.round(image.width*scale));
     canvas.height=Math.max(1,Math.round(image.height*scale));
     canvas.getContext("2d").drawImage(image,0,0,canvas.width,canvas.height);
-    let quality=.75;
-    let output=canvas.toDataURL("image/jpeg",quality);
-    while(output.length>180000&&quality>.3){
-     quality-=.1;
-     output=canvas.toDataURL("image/jpeg",quality);
-    }
+    let quality=.75,output=canvas.toDataURL("image/jpeg",quality);
+    while(output.length>180000&&quality>.3){quality-=.1;output=canvas.toDataURL("image/jpeg",quality)}
     if(output.length>180000)reject(Error("Picture too large. Choose another."));
     else resolve(output);
    };
@@ -226,20 +265,14 @@ function compressImage(file){
 }
 
 $("photoFile").onchange=async e=>{
- const file=e.target.files?.[0];
- if(!file)return;
- if(!file.type.startsWith("image/")){
-  status("profileStatus","Please choose an image.");
-  return;
- }
+ const file=e.target.files?.[0];if(!file)return;
+ if(!file.type.startsWith("image/"))return status("profileStatus","Please choose an image.");
  try{
   pendingPhoto=await compressImage(file);
   $("profilePreview").src=pendingPhoto;
   $("profilePreview").hidden=false;
   status("profileStatus","Picture selected. Tap Save profile.");
- }catch(err){
-  status("profileStatus",err.message);
- }
+ }catch(err){status("profileStatus",err.message)}
 };
 
 $("saveProfile").onclick=async()=>{
@@ -250,144 +283,99 @@ $("saveProfile").onclick=async()=>{
   const updates={displayName:name};
   if(pendingPhoto)updates.photoUrl=pendingPhoto;
   await setDoc(doc(db,"users",currentUser.uid),updates,{merge:true});
-  myProfile={...myProfile,...updates};
-  pendingPhoto="";
-  $("welcomeText").textContent="Hello, "+name;
+  myProfile={...myProfile,...updates};pendingPhoto="";
+  $("settingsName").textContent=name;
   status("profileStatus","Profile saved.");
-  renderPeople();
-  renderChats();
- }catch(err){
-  status("profileStatus",err.message);
- }
+  renderPeople();renderChats();
+ }catch(err){status("profileStatus",err.message)}
 };
 
 $("logoutButton").onclick=()=>signOut(auth).catch(e=>alert(e.message));
-$("profileToggle").onclick=()=>$("profileArea").classList.toggle("hidden");
 
 onAuthStateChanged(auth,async user=>{
  currentUser=user;
  if(!user){
   cleanup();
-  $("authPanel").classList.remove("hidden");
-  $("mainPanel").classList.add("hidden");
-  $("chatPanel").classList.add("hidden");
+  $("authScreen").classList.remove("hidden");
+  $("app").classList.add("hidden");
+  $("chatScreen").classList.add("hidden");
   return;
  }
-
- $("authPanel").classList.add("hidden");
- $("mainPanel").classList.remove("hidden");
- $("chatPanel").classList.add("hidden");
-
+ $("authScreen").classList.add("hidden");
+ $("app").classList.remove("hidden");
+ $("chatScreen").classList.add("hidden");
  try{
   const ref=doc(db,"users",user.uid);
   let snap=await getDoc(ref);
   if(!snap.exists()){
-   await setDoc(ref,{
-    uid:user.uid,
-    email:user.email||"",
-    displayName:user.email||"YUPO user",
-    photoUrl:"",
-    createdAt:serverTimestamp()
-   },{merge:true});
+   await setDoc(ref,{uid:user.uid,email:user.email||"",displayName:user.email||"YUPO user",photoUrl:"",createdAt:serverTimestamp()},{merge:true});
   }
   myProfile=(await getDoc(ref)).data()||{};
-  $("welcomeText").textContent="Hello, "+(myProfile.displayName||user.email);
+  $("settingsName").textContent=myProfile.displayName||"My account";
+  $("settingsEmail").textContent=user.email||"";
   $("myName").value=myProfile.displayName||"";
-  if(myProfile.photoUrl){
-   $("profilePreview").src=myProfile.photoUrl;
-   $("profilePreview").hidden=false;
-  }else{
-   $("profilePreview").hidden=true;
-  }
-  startPeople();
-  startChats();
- }catch(err){
-  alert("Could not load your profile: "+err.message);
- }
+  if(myProfile.photoUrl){$("profilePreview").src=myProfile.photoUrl;$("profilePreview").hidden=false}
+  else $("profilePreview").hidden=true;
+  showPage("chatsPage");
+  startPeople();startChats();
+ }catch(err){alert("Could not load your profile: "+err.message)}
 });
 
 function startPeople(){
  if(stopPeople)stopPeople();
  stopPeople=onSnapshot(collection(db,"users"),snap=>{
-  peopleData=snap.docs
-   .map(d=>({id:d.id,...d.data()}))
-   .filter(p=>p.id!==currentUser.uid);
-  renderPeople();
-  renderChats();
- },err=>{
-  $("peopleList").textContent="Could not load people: "+err.message;
- });
+  peopleData=snap.docs.map(d=>({id:d.id,...d.data()})).filter(p=>p.id!==currentUser.uid);
+  renderPeople();renderChats();
+ },err=>{$("peopleList").textContent="Could not load people: "+err.message});
 }
-
 $("peopleSearch").oninput=renderPeople;
+$("chatSearch").oninput=renderChats;
 
 function renderPeople(){
  if(!currentUser)return;
  const search=$("peopleSearch").value.trim().toLowerCase();
- const matches=peopleData.filter(p=>
-  (p.displayName||"").toLowerCase().includes(search)||
-  (p.email||"").toLowerCase().includes(search)
- );
+ const matches=peopleData.filter(p=>(p.displayName||"").toLowerCase().includes(search)||(p.email||"").toLowerCase().includes(search));
  $("peopleList").innerHTML="";
- if(!matches.length){
-  $("peopleList").innerHTML='<p class="muted">No other users found yet.</p>';
-  return;
- }
+ if(!matches.length){$("peopleList").innerHTML='<p class="muted">No other users found yet.</p>';return}
  matches.forEach(person=>{
-  const row=document.createElement("div");
-  row.className="person";
-  row.innerHTML=`${avatar(person)}<div class="person-info"><strong>${safe(person.displayName||"YUPO user")}</strong><small>${safe(person.email||"")}</small></div><span class="muted">Chat ›</span>`;
-  row.onclick=()=>openChat(person);
-  $("peopleList").appendChild(row);
+  const row=document.createElement("div");row.className="person";
+  row.innerHTML=`${avatar(person)}<div class="info"><strong>${safe(person.displayName||"YUPO user")}</strong><small>${safe(person.email||"")}</small></div><span class="arrow">›</span>`;
+  row.onclick=()=>openChat(person);$("peopleList").appendChild(row);
  });
 }
 
 async function openChat(person){
- selectedPerson=person;
- selectedChatId=chatId(currentUser.uid,person.id);
- $("homePanel").classList.add("hidden");
- $("chatPanel").classList.remove("hidden");
+ selectedPerson=person;selectedChatId=chatId(currentUser.uid,person.id);
+ $("chatScreen").classList.remove("hidden");
  $("chatTitle").textContent=person.displayName||person.email||"Conversation";
+ $("chatAvatar").innerHTML=avatar(person);
  $("messages").innerHTML='<p class="muted">Loading messages...</p>';
  status("chatStatus","");
  try{
-  await setDoc(doc(db,"chats",selectedChatId),{
-   members:[currentUser.uid,person.id],
-   updatedAt:serverTimestamp()
-  },{merge:true});
-
+  await setDoc(doc(db,"chats",selectedChatId),{members:[currentUser.uid,person.id],updatedAt:serverTimestamp()},{merge:true});
   if(stopMessages)stopMessages();
   const ref=collection(db,"chats",selectedChatId,"messages");
   const q=query(ref,orderBy("createdAt","asc"),limit(200));
   stopMessages=onSnapshot(q,snap=>{
    $("messages").innerHTML="";
    snap.forEach(d=>{
-    const m=d.data();
-    const bubble=document.createElement("div");
+    const m=d.data(),bubble=document.createElement("div");
     bubble.className="bubble"+(m.senderId===currentUser.uid?" mine":"");
-    const content=document.createElement("div");
-    content.textContent=m.text||"";
+    const content=document.createElement("div");content.textContent=m.text||"";
     bubble.appendChild(content);
     const time=document.createElement("small");
-    time.textContent=m.createdAt?.toDate?
-     m.createdAt.toDate().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}):"";
-    bubble.appendChild(time);
-    $("messages").appendChild(bubble);
+    time.textContent=m.createdAt?.toDate?m.createdAt.toDate().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}):"";
+    bubble.appendChild(time);$("messages").appendChild(bubble);
    });
    $("messages").scrollTop=$("messages").scrollHeight;
   },err=>status("chatStatus","Message error: "+err.message));
- }catch(err){
-  status("chatStatus",err.message);
- }
+ }catch(err){status("chatStatus",err.message)}
 }
 
 $("backButton").onclick=()=>{
- if(stopMessages)stopMessages();
- stopMessages=null;
- $("chatPanel").classList.add("hidden");
- $("homePanel").classList.remove("hidden");
- selectedPerson=null;
- selectedChatId=null;
+ if(stopMessages)stopMessages();stopMessages=null;
+ $("chatScreen").classList.add("hidden");
+ selectedPerson=null;selectedChatId=null;
 };
 
 $("sendForm").addEventListener("submit",async e=>{
@@ -395,61 +383,46 @@ $("sendForm").addEventListener("submit",async e=>{
  const text=$("messageInput").value.trim();
  if(!text||!selectedChatId||!selectedPerson)return;
  try{
-  $("sendButton").disabled=true;
-  status("chatStatus","");
+  $("sendButton").disabled=true;status("chatStatus","");
   await addDoc(collection(db,"chats",selectedChatId,"messages"),{
-   text,
-   senderId:currentUser.uid,
-   senderEmail:currentUser.email||"",
-   createdAt:serverTimestamp()
+   text,senderId:currentUser.uid,senderEmail:currentUser.email||"",createdAt:serverTimestamp()
   });
   await setDoc(doc(db,"chats",selectedChatId),{
-   members:[currentUser.uid,selectedPerson.id],
-   lastMessage:text,
-   lastSenderId:currentUser.uid,
-   updatedAt:serverTimestamp()
+   members:[currentUser.uid,selectedPerson.id],lastMessage:text,lastSenderId:currentUser.uid,updatedAt:serverTimestamp()
   },{merge:true});
   $("messageInput").value="";
- }catch(err){
-  status("chatStatus","Message not sent: "+err.message);
- }finally{
-  $("sendButton").disabled=false;
- }
+ }catch(err){status("chatStatus","Message not sent: "+err.message)}
+ finally{$("sendButton").disabled=false}
 });
 
 function startChats(){
  if(stopChats)stopChats();
  const q=query(collection(db,"chats"),where("members","array-contains",currentUser.uid));
  stopChats=onSnapshot(q,snap=>{
-  window.yupoChats=snap.docs.map(d=>({id:d.id,...d.data()}));
-  renderChats();
- },err=>{
-  $("chatList").textContent="Could not load conversations: "+err.message;
- });
+  chatsData=snap.docs.map(d=>({id:d.id,...d.data()}));renderChats();
+ },err=>{$("chatList").textContent="Could not load conversations: "+err.message});
 }
 
 function renderChats(){
+ if(!currentUser)return;
+ const search=$("chatSearch").value.trim().toLowerCase();
+ const chats=[...chatsData].sort((a,b)=>(b.updatedAt?.toMillis?.()||0)-(a.updatedAt?.toMillis?.()||0));
  $("chatList").innerHTML="";
- const chats=window.yupoChats||[];
- chats.sort((a,b)=>(b.updatedAt?.toMillis?.()||0)-(a.updatedAt?.toMillis?.()||0));
- if(!chats.length){
-  $("chatList").innerHTML='<p class="muted">Your conversations will appear here.</p>';
-  return;
- }
+ let count=0;
  chats.forEach(chat=>{
   const uid=(chat.members||[]).find(id=>id!==currentUser.uid);
   const person=peopleData.find(p=>p.id===uid);
   if(!person)return;
-  const row=document.createElement("div");
-  row.className="person";
-  row.innerHTML=`${avatar(person)}<div class="person-info"><strong>${safe(person.displayName||"YUPO user")}</strong><small>${safe(chat.lastMessage||"Open conversation")}</small></div><span class="muted">Open ›</span>`;
-  row.onclick=()=>openChat(person);
-  $("chatList").appendChild(row);
+  const name=person.displayName||person.email||"YUPO user";
+  if(!name.toLowerCase().includes(search)&&!(chat.lastMessage||"").toLowerCase().includes(search))return;
+  count++;
+  const row=document.createElement("div");row.className="person";
+  row.innerHTML=`${avatar(person)}<div class="info"><strong>${safe(name)}</strong><small>${safe(chat.lastMessage||"Start chatting")}</small></div><span class="arrow">›</span>`;
+  row.onclick=()=>openChat(person);$("chatList").appendChild(row);
  });
+ if(!count)$("chatList").innerHTML='<p class="muted">No conversations yet. Open People to start a chat.</p>';
 }
-
 </script>
 </body>
-  </html>
-
+ </html>
  
