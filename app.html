@@ -119,11 +119,20 @@ input{width:100%;padding:13px;border:1px solid #dce7e0;border-radius:10px;margin
 
 <section id="settingsPage" class="page hidden">
 <h2 class="page-title">Settings</h2>
+
 <div class="panel profile-center">
 <img id="profilePreview" class="profile-photo" alt="Profile picture" hidden>
 <h3 id="settingsName">My account</h3>
 <p id="settingsEmail" class="muted"></p>
 </div>
+
+<div class="panel">
+<h3>Notifications 🔔</h3>
+<p class="muted">Enable notifications to receive YUPO alerts on this device.</p>
+<button id="enableNotifications" class="primary">Enable Notifications</button>
+<p id="notificationStatus" class="status"></p>
+</div>
+
 <div class="panel">
 <h3>Edit profile</h3>
 <label>Choose profile picture</label>
@@ -133,6 +142,7 @@ input{width:100%;padding:13px;border:1px solid #dce7e0;border-radius:10px;margin
 <button id="saveProfile" class="primary">Save profile</button>
 <p id="profileStatus" class="status"></p>
 </div>
+
 <div class="panel">
 <h3>About YUPO</h3>
 <p class="muted">YUPO Chatting — Connect. Chat. Stay in touch.</p>
@@ -170,6 +180,7 @@ input{width:100%;padding:13px;border:1px solid #dce7e0;border-radius:10px;margin
 import{initializeApp}from"https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,onAuthStateChanged,signOut}from"https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 import{getFirestore,doc,setDoc,getDoc,collection,query,where,onSnapshot,addDoc,serverTimestamp,orderBy,limit}from"https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+import{getMessaging,isSupported,getToken,onMessage}from"https://www.gstatic.com/firebasejs/11.10.0/firebase-messaging.js";
 
 const firebaseConfig={
  apiKey:"AIzaSyDz20UKnzkY_F43lmv1deE2LQZ6bBGwbDk",
@@ -181,6 +192,8 @@ const firebaseConfig={
  measurementId:"G-0L70YY0969"
 };
 
+const VAPID_KEY="BDIrJyZ-e8E8O90jm_j6zicbOGKGviwJqMJA2ODGpMQp8qYP4WmvcNlFE6iPVzHoL8uTcFFPtFmEiZg2ppcol9A";
+
 const app=initializeApp(firebaseConfig);
 const auth=getAuth(app);
 const db=getFirestore(app);
@@ -189,6 +202,7 @@ const $=id=>document.getElementById(id);
 let currentUser=null,myProfile={},selectedPerson=null,selectedChatId=null;
 let isRegister=false,peopleData=[],stopPeople=null,stopChats=null,stopMessages=null,pendingPhoto="";
 let chatsData=[];
+let messaging=null;
 
 function status(id,message){$(id).textContent=message}
 function safe(value){return String(value||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
@@ -292,6 +306,78 @@ $("saveProfile").onclick=async()=>{
 
 $("logoutButton").onclick=()=>signOut(auth).catch(e=>alert(e.message));
 
+async function enableYupoNotifications(){
+ const button=$("enableNotifications");
+ button.disabled=true;
+ status("notificationStatus","Checking notification support...");
+
+ try{
+  if(!("Notification" in window)){
+   throw Error("This browser does not support notifications.");
+  }
+
+  if(!("serviceWorker" in navigator)){
+   throw Error("Service workers are not supported in this browser.");
+  }
+
+  if(!window.isSecureContext){
+   throw Error("Notifications require a secure HTTPS connection.");
+  }
+
+  if(!(await isSupported())){
+   throw Error("Firebase notifications are not supported in this browser.");
+  }
+
+  const permission=await Notification.requestPermission();
+
+  if(permission!=="granted"){
+   throw Error("Notification permission was not granted. Check Chrome site settings.");
+  }
+
+  const registration=await navigator.serviceWorker.register(
+   "./firebase-messaging-sw.js"
+  );
+
+  await navigator.serviceWorker.ready;
+
+  messaging=getMessaging(app);
+
+  const token=await getToken(messaging,{
+   vapidKey:VAPID_KEY,
+   serviceWorkerRegistration:registration
+  });
+
+  if(!token){
+   throw Error("Firebase did not return a notification token. Please try again.");
+  }
+
+  await setDoc(doc(db,"users",currentUser.uid),{
+   fcmToken:token,
+   notificationsEnabled:true,
+   notificationUpdatedAt:serverTimestamp()
+  },{merge:true});
+
+  status("notificationStatus","Notifications enabled on this device! 🎉");
+  button.textContent="Notifications Enabled";
+
+  onMessage(messaging,payload=>{
+   const title=payload.notification?.title||"YUPO Chatting";
+   const body=payload.notification?.body||"You have a new message.";
+   if(Notification.permission==="granted"){
+    new Notification(title,{body,icon:"./icon.png"});
+   }
+  });
+
+ }catch(err){
+  console.error("YUPO notification setup:",err);
+  status("notificationStatus","Setup error: "+err.message);
+ }finally{
+  button.disabled=false;
+ }
+}
+
+$("enableNotifications").onclick=enableYupoNotifications;
+
 onAuthStateChanged(auth,async user=>{
  currentUser=user;
  if(!user){
@@ -301,23 +387,37 @@ onAuthStateChanged(auth,async user=>{
   $("chatScreen").classList.add("hidden");
   return;
  }
+
  $("authScreen").classList.add("hidden");
  $("app").classList.remove("hidden");
  $("chatScreen").classList.add("hidden");
+
  try{
   const ref=doc(db,"users",user.uid);
   let snap=await getDoc(ref);
   if(!snap.exists()){
    await setDoc(ref,{uid:user.uid,email:user.email||"",displayName:user.email||"YUPO user",photoUrl:"",createdAt:serverTimestamp()},{merge:true});
   }
+
   myProfile=(await getDoc(ref)).data()||{};
   $("settingsName").textContent=myProfile.displayName||"My account";
   $("settingsEmail").textContent=user.email||"";
   $("myName").value=myProfile.displayName||"";
-  if(myProfile.photoUrl){$("profilePreview").src=myProfile.photoUrl;$("profilePreview").hidden=false}
-  else $("profilePreview").hidden=true;
+
+  if(myProfile.photoUrl){
+   $("profilePreview").src=myProfile.photoUrl;
+   $("profilePreview").hidden=false;
+  }else $("profilePreview").hidden=true;
+
+  if(myProfile.notificationsEnabled&&Notification.permission==="granted"){
+   $("enableNotifications").textContent="Notifications Enabled";
+   status("notificationStatus","Notifications are enabled on this device.");
+  }
+
   showPage("chatsPage");
-  startPeople();startChats();
+  startPeople();
+  startChats();
+
  }catch(err){alert("Could not load your profile: "+err.message)}
 });
 
@@ -328,101 +428,96 @@ function startPeople(){
   renderPeople();renderChats();
  },err=>{$("peopleList").textContent="Could not load people: "+err.message});
 }
+
 $("peopleSearch").oninput=renderPeople;
 $("chatSearch").oninput=renderChats;
 
 function renderPeople(){
  if(!currentUser)return;
  const search=$("peopleSearch").value.trim().toLowerCase();
- const matches=peopleData.filter(p=>(p.displayName||"").toLowerCase().includes(search)||(p.email||"").toLowerCase().includes(search));
+ const matches=peopleData.filter(p=>
+  (p.displayName||"").toLowerCase().includes(search)||
+  (p.email||"").toLowerCase().includes(search)
+ );
+
  $("peopleList").innerHTML="";
- if(!matches.length){$("peopleList").innerHTML='<p class="muted">No other users found yet.</p>';return}
+ if(!matches.length){
+  $("peopleList").innerHTML='<p class="muted">No other users found yet.</p>';
+  return;
+ }
+
  matches.forEach(person=>{
-  const row=document.createElement("div");row.className="person";
+  const row=document.createElement("div");
+  row.className="person";
   row.innerHTML=`${avatar(person)}<div class="info"><strong>${safe(person.displayName||"YUPO user")}</strong><small>${safe(person.email||"")}</small></div><span class="arrow">›</span>`;
-  row.onclick=()=>openChat(person);$("peopleList").appendChild(row);
+  row.onclick=()=>openChat(person);
+  $("peopleList").appendChild(row);
  });
 }
 
 async function openChat(person){
- selectedPerson=person;selectedChatId=chatId(currentUser.uid,person.id);
+ selectedPerson=person;
+ selectedChatId=chatId(currentUser.uid,person.id);
  $("chatScreen").classList.remove("hidden");
  $("chatTitle").textContent=person.displayName||person.email||"Conversation";
  $("chatAvatar").innerHTML=avatar(person);
  $("messages").innerHTML='<p class="muted">Loading messages...</p>';
  status("chatStatus","");
+
  try{
-  await setDoc(doc(db,"chats",selectedChatId),{members:[currentUser.uid,person.id],updatedAt:serverTimestamp()},{merge:true});
+  await setDoc(doc(db,"chats",selectedChatId),{
+   members:[currentUser.uid,person.id],
+   updatedAt:serverTimestamp()
+  },{merge:true});
+
   if(stopMessages)stopMessages();
+
   const ref=collection(db,"chats",selectedChatId,"messages");
   const q=query(ref,orderBy("createdAt","asc"),limit(200));
+
   stopMessages=onSnapshot(q,snap=>{
    $("messages").innerHTML="";
    snap.forEach(d=>{
     const m=d.data(),bubble=document.createElement("div");
     bubble.className="bubble"+(m.senderId===currentUser.uid?" mine":"");
-    const content=document.createElement("div");content.textContent=m.text||"";
+    const content=document.createElement("div");
+    content.textContent=m.text||"";
     bubble.appendChild(content);
+
     const time=document.createElement("small");
-    time.textContent=m.createdAt?.toDate?m.createdAt.toDate().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}):"";
-    bubble.appendChild(time);$("messages").appendChild(bubble);
+    time.textContent=m.createdAt?.toDate?
+     m.createdAt.toDate().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}):"";
+    bubble.appendChild(time);
+    $("messages").appendChild(bubble);
    });
    $("messages").scrollTop=$("messages").scrollHeight;
   },err=>status("chatStatus","Message error: "+err.message));
+
  }catch(err){status("chatStatus",err.message)}
 }
 
 $("backButton").onclick=()=>{
- if(stopMessages)stopMessages();stopMessages=null;
+ if(stopMessages)stopMessages();
+ stopMessages=null;
  $("chatScreen").classList.add("hidden");
- selectedPerson=null;selectedChatId=null;
+ selectedPerson=null;
+ selectedChatId=null;
 };
 
 $("sendForm").addEventListener("submit",async e=>{
  e.preventDefault();
  const text=$("messageInput").value.trim();
  if(!text||!selectedChatId||!selectedPerson)return;
+
  try{
-  $("sendButton").disabled=true;status("chatStatus","");
+  $("sendButton").disabled=true;
+  status("chatStatus","");
+
   await addDoc(collection(db,"chats",selectedChatId,"messages"),{
-   text,senderId:currentUser.uid,senderEmail:currentUser.email||"",createdAt:serverTimestamp()
+   text,
+   senderId:currentUser.uid,
+   senderEmail:currentUser.email||"",
+   createdAt:serverTimestamp()
   });
-  await setDoc(doc(db,"chats",selectedChatId),{
-   members:[currentUser.uid,selectedPerson.id],lastMessage:text,lastSenderId:currentUser.uid,updatedAt:serverTimestamp()
-  },{merge:true});
-  $("messageInput").value="";
- }catch(err){status("chatStatus","Message not sent: "+err.message)}
- finally{$("sendButton").disabled=false}
-});
 
-function startChats(){
- if(stopChats)stopChats();
- const q=query(collection(db,"chats"),where("members","array-contains",currentUser.uid));
- stopChats=onSnapshot(q,snap=>{
-  chatsData=snap.docs.map(d=>({id:d.id,...d.data()}));renderChats();
- },err=>{$("chatList").textContent="Could not load conversations: "+err.message});
-}
-
-function renderChats(){
- if(!currentUser)return;
- const search=$("chatSearch").value.trim().toLowerCase();
- const chats=[...chatsData].sort((a,b)=>(b.updatedAt?.toMillis?.()||0)-(a.updatedAt?.toMillis?.()||0));
- $("chatList").innerHTML="";
- let count=0;
- chats.forEach(chat=>{
-  const uid=(chat.members||[]).find(id=>id!==currentUser.uid);
-  const person=peopleData.find(p=>p.id===uid);
-  if(!person)return;
-  const name=person.displayName||person.email||"YUPO user";
-  if(!name.toLowerCase().includes(search)&&!(chat.lastMessage||"").toLowerCase().includes(search))return;
-  count++;
-  const row=document.createElement("div");row.className="person";
-  row.innerHTML=`${avatar(person)}<div class="info"><strong>${safe(name)}</strong><small>${safe(chat.lastMessage||"Start chatting")}</small></div><span class="arrow">›</span>`;
-  row.onclick=()=>openChat(person);$("chatList").appendChild(row);
- });
- if(!count)$("chatList").innerHTML='<p class="muted">No conversations yet. Open People to start a chat.</p>';
-}
-</script>
-</body>
- </html>
- 
+  await setDoc(
