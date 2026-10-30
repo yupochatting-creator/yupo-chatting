@@ -7,6 +7,7 @@
 <meta name="theme-color" content="#087f5b">
 <link rel="manifest" href="./manifest.json">
 <title>YUPO Chatting</title>
+
 <style>
 *{box-sizing:border-box}
 body{margin:0;font:16px Arial,sans-serif;background:#eef5f1;color:#183329}
@@ -17,11 +18,13 @@ main{max-width:700px;margin:auto;padding:14px}
 h2,h3{margin-top:0}
 input,textarea{width:100%;padding:12px;margin:7px 0;border:1px solid #ccdcd2;border-radius:9px;font:inherit}
 button,.download{display:inline-block;border:0;border-radius:9px;padding:12px 15px;background:#087f5b;color:white;font-weight:bold;cursor:pointer;text-decoration:none}
+button:disabled{opacity:.5}
 .secondary{background:#e0f3e9;color:#087f5b}
 .row{display:flex;gap:8px;flex-wrap:wrap}
 .user{display:flex;align-items:center;gap:10px;border-bottom:1px solid #eee;padding:12px 0;overflow-wrap:anywhere}
 .user-info{flex:1;min-width:0}
 .avatar{width:46px;height:46px;border-radius:50%;object-fit:cover;background:#dceee4;display:flex;align-items:center;justify-content:center;color:#087f5b;font-weight:bold;flex-shrink:0}
+.profile-preview{width:105px;height:105px;border-radius:50%;object-fit:cover;background:#dceee4;display:block;margin:10px auto}
 #messages{height:300px;overflow-y:auto;background:#f4f8f5;border-radius:10px;padding:10px;margin:10px 0}
 .msg{background:#dff3e7;padding:9px 12px;border-radius:12px;margin:8px 0;overflow-wrap:anywhere;max-width:90%}
 .msg.mine{background:#dcecff;margin-left:auto}
@@ -32,11 +35,16 @@ button,.download{display:inline-block;border:0;border-radius:9px;padding:12px 15
 [hidden]{display:none!important}
 </style>
 </head>
+
 <body>
 <header>
   <div class="logo">Y</div>
-  <div><h2 style="margin:0 0 4px">YUPO Chatting</h2><div>Connect. Chat. Stay in touch.</div></div>
+  <div>
+    <h2 style="margin:0 0 4px">YUPO Chatting</h2>
+    <div>Connect. Chat. Stay in touch.</div>
+  </div>
 </header>
+
 <main>
 <section class="panel">
   <h2>Welcome to YUPO 💬</h2>
@@ -51,7 +59,9 @@ button,.download{display:inline-block;border:0;border-radius:9px;padding:12px 15
       <input id="regPass" type="password" placeholder="Password (at least 6 characters)" minlength="6" autocomplete="new-password" required>
       <button type="submit">Create account</button>
     </form>
+
     <hr>
+
     <h3>Log in</h3>
     <form id="loginForm">
       <input id="loginEmail" type="email" placeholder="Email address" autocomplete="email" required>
@@ -62,13 +72,25 @@ button,.download{display:inline-block;border:0;border-radius:9px;padding:12px 15
 
   <div id="signedIn" hidden>
     <p>Signed in as <b id="myEmail"></b></p>
+
     <label for="displayName">Your display name</label>
     <input id="displayName" maxlength="40" placeholder="Choose a display name">
-    <label for="photoUrl">Profile picture HTTPS link (optional)</label>
-    <input id="photoUrl" type="url" placeholder="https://example.com/photo.jpg">
-    <p class="small">This accepts a direct image link; it does not upload a photo file.</p>
+
+    <h3>Choose your profile picture</h3>
+
+    <img id="profilePreview" class="profile-preview" alt="Profile picture preview" hidden>
+
+    <label for="photoFile">Select a picture from your phone Gallery</label>
+    <input id="photoFile" type="file" accept="image/*">
+
+    <p class="small">
+      Select a picture, preview it, and save your profile.
+      Pictures are compressed before saving.
+    </p>
+
     <div class="row">
       <button id="saveProfile" type="button">Save profile</button>
+      <button id="removePhoto" type="button" class="secondary">Remove picture</button>
       <button id="logout" type="button" class="secondary">Log out</button>
     </div>
   </div>
@@ -84,6 +106,7 @@ button,.download{display:inline-block;border:0;border-radius:9px;padding:12px 15
   <h3 id="chatTitle">Chat</h3>
   <p id="chatStatus" class="small">Messages are visible to members of this conversation.</p>
   <div id="messages" aria-live="polite"></div>
+
   <form id="sendForm">
     <textarea id="messageText" rows="2" maxlength="4000" placeholder="Write a message…" required></textarea>
     <div class="row">
@@ -92,17 +115,26 @@ button,.download{display:inline-block;border:0;border-radius:9px;padding:12px 15
       <button id="closeChat" type="button" class="secondary">Back to people</button>
     </div>
   </form>
-  <p class="note">Voice calling is not connected yet. It needs WebRTC, call signaling, and microphone permissions.</p>
+
+  <p class="note">
+    Voice calling is not connected yet. It needs WebRTC, call signaling, and microphone permissions.
+  </p>
 </section>
 
 <section class="panel">
   <h3>YUPO features</h3>
   <p>✅ Account registration and login</p>
-  <p>✅ Usernames and profile picture links</p>
+  <p>✅ Usernames and Gallery profile pictures</p>
   <p>✅ One-to-one text messaging</p>
   <p>⏳ Real voice calling needs additional setup</p>
-  <a id="apkDownload" class="download" href="./yupo-chatting.apk" download hidden>Download YUPO APK</a>
-  <p id="apkNotice" class="small">APK download will appear after a real APK file is added to the website.</p>
+
+  <a id="apkDownload" class="download" href="./yupo-chatting.apk" download hidden>
+    Download YUPO APK
+  </a>
+
+  <p id="apkNotice" class="small">
+    APK download will appear after a real APK file is added to the website.
+  </p>
 </section>
 </main>
 
@@ -140,20 +172,27 @@ let activeChat=null;
 let stopUsers=null;
 let stopMessages=null;
 let openingChat=false;
+let currentPhoto="";
+let removeCurrentPhoto=false;
 
 function status(message,error=false){
  $("status").textContent=message;
  $("status").className="status"+(error?" error":"");
 }
+
 function reportError(error){
  console.error(error);
  status("Error: "+(error.code||error.message||"Please try again"),true);
 }
+
 function stopListeners(){
  if(stopUsers){stopUsers();stopUsers=null}
  if(stopMessages){stopMessages();stopMessages=null}
 }
-function chatIdFor(a,b){return [a,b].sort().join("_")}
+
+function chatIdFor(a,b){
+ return [a,b].sort().join("_");
+}
 
 function safePhotoUrl(value){
  try{
@@ -162,29 +201,125 @@ function safePhotoUrl(value){
  }catch{return ""}
 }
 
+// Accept HTTPS image links and compressed JPEG images saved by this app.
+function photoSource(value){
+ if(typeof value!=="string")return "";
+ if(value.startsWith("data:image/jpeg;base64,")){
+  return value;
+ }
+ return safePhotoUrl(value);
+}
+
 function makeAvatar(person){
- const photo=safePhotoUrl(person.photoUrl||"");
+ const photo=photoSource(person.photoUrl||"");
+
  if(photo){
   const img=document.createElement("img");
   img.className="avatar";
   img.alt="Profile picture";
   img.src=photo;
   img.referrerPolicy="no-referrer";
+
   img.onerror=()=>{
-   img.replaceWith(document.createTextNode(
-    (person.displayName||"Y").slice(0,1).toUpperCase()
-   ));
+   const fallback=document.createElement("div");
+   fallback.className="avatar";
+   fallback.textContent=(person.displayName||"Y").slice(0,1).toUpperCase();
+   img.replaceWith(fallback);
   };
+
   return img;
  }
+
  const avatar=document.createElement("div");
  avatar.className="avatar";
  avatar.textContent=(person.displayName||"Y").slice(0,1).toUpperCase();
  return avatar;
 }
 
+// Resize and compress the selected picture before saving it.
+async function compressPhoto(file){
+ if(!file||!file.type.startsWith("image/")){
+  throw new Error("Please select an image from your Gallery.");
+ }
+
+ if(file.size>12*1024*1024){
+  throw new Error("Please choose an image smaller than 12 MB.");
+ }
+
+ const objectURL=URL.createObjectURL(file);
+
+ try{
+  const image=new Image();
+
+  await new Promise((resolve,reject)=>{
+   image.onload=resolve;
+   image.onerror=()=>reject(new Error("Could not open this picture."));
+   image.src=objectURL;
+  });
+
+  const maxSide=400;
+  const scale=Math.min(1,maxSide/Math.max(image.width,image.height));
+  const canvas=document.createElement("canvas");
+
+  canvas.width=Math.max(1,Math.round(image.width*scale));
+  canvas.height=Math.max(1,Math.round(image.height*scale));
+
+  const ctx=canvas.getContext("2d");
+  ctx.fillStyle="#ffffff";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.drawImage(image,0,0,canvas.width,canvas.height);
+
+  let blob=null;
+
+  for(const quality of [0.75,0.65,0.55,0.45,0.35]){
+   blob=await new Promise(resolve=>{
+    canvas.toBlob(resolve,"image/jpeg",quality);
+   });
+
+   if(blob&&blob.size<=180*1024)break;
+  }
+
+  if(!blob||blob.size>180*1024){
+   throw new Error("This picture could not be compressed enough. Choose another picture.");
+  }
+
+  return await new Promise((resolve,reject)=>{
+   const reader=new FileReader();
+   reader.onload=()=>resolve(reader.result);
+   reader.onerror=()=>reject(new Error("Could not read the picture."));
+   reader.readAsDataURL(blob);
+  });
+
+ }finally{
+  URL.revokeObjectURL(objectURL);
+ }
+}
+
+// Preview a picture as soon as it is selected.
+$("photoFile").addEventListener("change",async()=>{
+ const file=$("photoFile").files[0];
+ if(!file)return;
+
+ try{
+  status("Preparing your picture…");
+  const compressed=await compressPhoto(file);
+
+  $("profilePreview").src=compressed;
+  $("profilePreview").hidden=false;
+  currentPhoto=compressed;
+  removeCurrentPhoto=false;
+
+  status("Picture selected. Tap Save profile to save it.");
+ }catch(error){
+  $("photoFile").value="";
+  status(error.message,true);
+ }
+});
+
+// Create account.
 $("registerForm").addEventListener("submit",async e=>{
  e.preventDefault();
+
  try{
   await createUserWithEmailAndPassword(
    auth,$("regEmail").value.trim(),$("regPass").value
@@ -193,8 +328,10 @@ $("registerForm").addEventListener("submit",async e=>{
  }catch(err){reportError(err)}
 });
 
+// Log in.
 $("loginForm").addEventListener("submit",async e=>{
  e.preventDefault();
+
  try{
   await signInWithEmailAndPassword(
    auth,$("loginEmail").value.trim(),$("loginPass").value
@@ -203,6 +340,7 @@ $("loginForm").addEventListener("submit",async e=>{
  }catch(err){reportError(err)}
 });
 
+// Log out.
 $("logout").addEventListener("click",async()=>{
  try{
   stopListeners();
@@ -211,41 +349,72 @@ $("logout").addEventListener("click",async()=>{
  }catch(err){reportError(err)}
 });
 
+// Save profile and selected picture.
 $("saveProfile").addEventListener("click",async()=>{
  if(!currentUser)return;
 
  const name=$("displayName").value.trim().slice(0,40);
- const rawUrl=$("photoUrl").value.trim();
- const photoUrl=rawUrl?safePhotoUrl(rawUrl):"";
 
- if(!name){status("Please enter a display name.",true);return}
- if(rawUrl&&!photoUrl){
-  status("Use a valid HTTPS image link, or leave the field blank.",true);
+ if(!name){
+  status("Please enter a display name.",true);
   return;
  }
 
  try{
+  $("saveProfile").disabled=true;
+  status("Saving your profile…");
+
+  let photoToSave=currentPhoto;
+
+  if(removeCurrentPhoto){
+   photoToSave="";
+  }
+
   await setDoc(doc(db,"users",currentUser.uid),{
    uid:currentUser.uid,
    email:currentUser.email||"",
    displayName:name,
-   photoUrl:photoUrl,
+   photoUrl:photoToSave,
    updatedAt:serverTimestamp()
   },{merge:true});
-  status("Profile saved.");
- }catch(err){reportError(err)}
+
+  currentPhoto=photoToSave;
+  removeCurrentPhoto=false;
+  $("photoFile").value="";
+
+  status("Your profile and picture have been saved!");
+ }catch(err){
+  reportError(err);
+ }finally{
+  $("saveProfile").disabled=false;
+ }
 });
 
+// Remove the profile picture.
+$("removePhoto").addEventListener("click",()=>{
+ currentPhoto="";
+ removeCurrentPhoto=true;
+ $("photoFile").value="";
+ $("profilePreview").removeAttribute("src");
+ $("profilePreview").hidden=true;
+ status("Picture removal selected. Tap Save profile to confirm.");
+});
+
+// Load account information after login.
 onAuthStateChanged(auth,async user=>{
  stopListeners();
  currentUser=user;
  activeChat=null;
+ currentPhoto="";
+ removeCurrentPhoto=false;
+
  $("chatPanel").hidden=true;
  $("directory").hidden=!user;
  $("authForms").hidden=!!user;
  $("signedIn").hidden=!user;
 
  if(!user){
+  $("profilePreview").hidden=true;
   status("Create an account or log in to YUPO.");
   return;
  }
@@ -259,8 +428,16 @@ onAuthStateChanged(auth,async user=>{
 
   if(snap.exists()){
    const data=snap.data();
+
    $("displayName").value=data.displayName||"";
-   $("photoUrl").value=data.photoUrl||"";
+   currentPhoto=photoSource(data.photoUrl||"");
+
+   if(currentPhoto){
+    $("profilePreview").src=currentPhoto;
+    $("profilePreview").hidden=false;
+   }else{
+    $("profilePreview").hidden=true;
+   }
   }else{
    await setDoc(ref,{
     uid:user.uid,
@@ -269,17 +446,21 @@ onAuthStateChanged(auth,async user=>{
     photoUrl:"",
     updatedAt:serverTimestamp()
    });
+   $("profilePreview").hidden=true;
   }
 
   status("Signed in. Find people below.");
   loadUsers();
+
  }catch(err){reportError(err)}
 });
 
+// Show other registered users.
 function loadUsers(){
  if(stopUsers)stopUsers();
 
  const q=query(collection(db,"users"),limit(100));
+
  stopUsers=onSnapshot(q,snapshot=>{
   const list=$("users");
   list.replaceChildren();
@@ -287,6 +468,7 @@ function loadUsers(){
 
   snapshot.forEach(s=>{
    const person=s.data();
+
    if(s.id===currentUser.uid)return;
    count++;
 
@@ -309,7 +491,10 @@ function loadUsers(){
    const btn=document.createElement("button");
    btn.type="button";
    btn.textContent="Chat";
-   btn.addEventListener("click",()=>openChat(person));
+   btn.addEventListener("click",()=>openChat({
+    uid:s.id,
+    displayName:person.displayName||person.email||"YUPO user"
+   }));
 
    row.append(label,btn);
    list.append(row);
@@ -321,6 +506,7 @@ function loadUsers(){
  },reportError);
 }
 
+// Open a conversation.
 async function openChat(person){
  if(openingChat||!currentUser)return;
  openingChat=true;
@@ -338,8 +524,8 @@ async function openChat(person){
   }
 
   activeChat={id,person};
-  $("chatTitle").textContent="Chat with "+
-   (person.displayName||person.email||"YUPO user");
+
+  $("chatTitle").textContent="Chat with "+person.displayName;
   $("chatStatus").textContent="Messages are visible to conversation members.";
   $("chatPanel").hidden=false;
   $("messages").replaceChildren();
@@ -359,12 +545,13 @@ async function openChat(person){
    snapshot.forEach(s=>{
     const m=s.data();
     const bubble=document.createElement("div");
+
     bubble.className="msg"+
      (m.senderId===currentUser.uid?" mine":"");
 
     const who=document.createElement("b");
     who.textContent=m.senderId===currentUser.uid
-     ?"You":(person.displayName||"Friend");
+     ?"You":person.displayName;
 
     const text=document.createElement("div");
     text.textContent=m.text||"";
@@ -382,24 +569,32 @@ async function openChat(person){
  finally{openingChat=false}
 }
 
+// Voice call placeholder.
 $("voiceCall").addEventListener("click",()=>{
  alert("Voice calling is not ready yet. WebRTC and call signaling must be configured first.");
 });
 
+// Return to people.
 $("closeChat").addEventListener("click",()=>{
- if(stopMessages){stopMessages();stopMessages=null}
+ if(stopMessages){
+  stopMessages();
+  stopMessages=null;
+ }
  activeChat=null;
  $("chatPanel").hidden=true;
 });
 
+// Send a text message.
 $("sendForm").addEventListener("submit",async e=>{
  e.preventDefault();
+
  if(!currentUser||!activeChat)return;
 
  const text=$("messageText").value.trim();
  if(!text)return;
 
  $("sendButton").disabled=true;
+
  try{
   await addDoc(
    collection(db,"chats",activeChat.id,"messages"),
@@ -409,6 +604,7 @@ $("sendForm").addEventListener("submit",async e=>{
     createdAt:serverTimestamp()
    }
   );
+
   $("messageText").value="";
  }catch(err){
   $("chatStatus").textContent="Message not sent: "+err.message;
@@ -417,7 +613,7 @@ $("sendForm").addEventListener("submit",async e=>{
  }
 });
 
-// Show the APK link only if the file exists on the published website.
+// Show APK download only if the APK exists.
 fetch("./yupo-chatting.apk",{method:"HEAD"})
  .then(response=>{
   if(response.ok){
