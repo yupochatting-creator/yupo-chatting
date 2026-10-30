@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#087f5b">
 <title>YUPO Chatting</title>
+
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#f1f6f3;color:#183329;font-family:Arial,sans-serif}
@@ -52,37 +52,47 @@ button{padding:12px 16px;border-radius:10px}
 .bubble{max-width:82%;width:fit-content;background:white;padding:10px 12px;margin:8px 0;border-radius:13px;overflow-wrap:anywhere;box-shadow:0 1px 2px #0000000b}
 .mine{margin-left:auto;background:#d4f4df}
 .bubble small{display:block;text-align:right;color:#829088;font-size:10px;margin-top:5px}
+.receipt{font-size:11px;margin-left:5px;color:#718078}
+.receipt.read{color:#1688e8}
 .sendbox{background:white;padding:10px;display:flex;gap:8px;padding-bottom:calc(10px + env(safe-area-inset-bottom))}
 .sendbox input{margin:0;border-radius:25px;min-width:0}
 .sendbox button{border-radius:50%;width:47px;flex-shrink:0}
 </style>
 </head>
+
 <body>
 
 <section id="authScreen">
 <h1>YUPO 💬</h1>
 <p style="text-align:center;color:#718078">Connect. Chat. Stay in touch.</p>
+
 <div class="authbox">
 <div class="auth-tabs">
 <button id="loginTab" class="primary" type="button">Login</button>
 <button id="registerTab" class="secondary" type="button">Register</button>
 </div>
+
 <form id="authForm">
 <label>Email address</label>
 <input id="email" type="email" placeholder="Enter your email" autocomplete="email" required>
+
 <label>Password</label>
 <input id="password" type="password" minlength="6" placeholder="At least 6 characters" autocomplete="current-password" required>
+
 <div id="nameField" class="hidden">
 <label>Your display name</label>
 <input id="displayName" maxlength="40" placeholder="Your name">
 </div>
+
 <button id="authButton" class="primary" style="width:100%" type="submit">Login</button>
 </form>
+
 <p id="authStatus" class="status" role="status"></p>
 </div>
 </section>
 
 <div id="app" class="hidden">
+
 <header class="topbar">
 <div class="brand">YUPO</div>
 <div class="subtitle">Connect. Chat. Stay in touch.</div>
@@ -112,6 +122,7 @@ button{padding:12px 16px;border-radius:10px}
 
 <section id="settingsPage" class="page hidden">
 <h2 class="page-title">Settings</h2>
+
 <div class="panel profile-center">
 <img id="profilePreview" class="profile-photo" alt="Profile picture" hidden>
 <h3 id="settingsName">My account</h3>
@@ -159,24 +170,31 @@ button{padding:12px 16px;border-radius:10px}
 <small style="display:block">YUPO Chat</small>
 </div>
 </div>
+
 <div id="messages"></div>
+
 <form id="sendForm" class="sendbox">
 <input id="messageInput" maxlength="4000" placeholder="Write a message..." autocomplete="off" required>
 <button id="sendButton" class="primary" type="submit">➤</button>
 </form>
+
 <p id="chatStatus" class="status" style="background:white;padding:0 12px"></p>
 </section>
 
 <script type="module">
+
 import {initializeApp} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+
 import {
  getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,
  onAuthStateChanged,signOut
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+
 import {
  getFirestore,doc,setDoc,getDoc,collection,query,where,
- onSnapshot,addDoc,serverTimestamp,orderBy,limit
+ onSnapshot,addDoc,serverTimestamp,orderBy,limit,updateDoc
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+
 import {
  getMessaging,isSupported,getToken,onMessage
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-messaging.js";
@@ -248,6 +266,7 @@ function showPage(page) {
  ["chatsPage","peoplePage","callsPage","settingsPage"].forEach(id=>{
   $(id).classList.toggle("hidden",id!==page);
  });
+
  document.querySelectorAll(".navbtn").forEach(button=>{
   button.classList.toggle("active",button.dataset.page===page);
  });
@@ -308,7 +327,9 @@ $("authForm").addEventListener("submit",async event=>{
   }
  } catch(error) {
   console.error("YUPO login error:",error);
+
   let message=error.message||"Something went wrong.";
+
   if(error.code==="auth/invalid-credential"||error.code==="auth/wrong-password"||error.code==="auth/user-not-found") {
    message="Email or password is incorrect. Please check and try again.";
   } else if(error.code==="auth/invalid-email") {
@@ -322,6 +343,7 @@ $("authForm").addEventListener("submit",async event=>{
   } else if(error.code==="auth/weak-password") {
    message="Choose a stronger password with at least 6 characters.";
   }
+
   showStatus("authStatus",message,true);
  } finally {
   button.disabled=false;
@@ -332,27 +354,38 @@ $("authForm").addEventListener("submit",async event=>{
 function compressImage(file) {
  return new Promise((resolve,reject)=>{
   const reader=new FileReader();
+
   reader.onerror=()=>reject(Error("Could not read picture."));
+
   reader.onload=()=>{
    const image=new Image();
+
    image.onerror=()=>reject(Error("Could not open picture."));
+
    image.onload=()=>{
     const canvas=document.createElement("canvas");
     const scale=Math.min(1,350/Math.max(image.width,image.height));
+
     canvas.width=Math.max(1,Math.round(image.width*scale));
     canvas.height=Math.max(1,Math.round(image.height*scale));
+
     canvas.getContext("2d").drawImage(image,0,0,canvas.width,canvas.height);
+
     let quality=.75;
     let output=canvas.toDataURL("image/jpeg",quality);
+
     while(output.length>180000&&quality>.3) {
      quality-=.1;
      output=canvas.toDataURL("image/jpeg",quality);
     }
+
     if(output.length>180000)reject(Error("Picture too large. Choose another."));
     else resolve(output);
    };
+
    image.src=reader.result;
   };
+
   reader.readAsDataURL(file);
  });
 }
@@ -360,10 +393,12 @@ function compressImage(file) {
 $("photoFile").addEventListener("change",async event=>{
  const file=event.target.files?.[0];
  if(!file)return;
+
  if(!file.type.startsWith("image/")) {
   showStatus("profileStatus","Please choose an image.",true);
   return;
  }
+
  try {
   pendingPhoto=await compressImage(file);
   $("profilePreview").src=pendingPhoto;
@@ -376,20 +411,28 @@ $("photoFile").addEventListener("change",async event=>{
 
 $("saveProfile").addEventListener("click",async()=>{
  if(!currentUser)return;
+
  const name=$("myName").value.trim();
+
  if(!name) {
   showStatus("profileStatus","Please enter your display name.",true);
   return;
  }
+
  try {
   showStatus("profileStatus","Saving...");
+
   const updates={displayName:name};
   if(pendingPhoto)updates.photoUrl=pendingPhoto;
+
   await setDoc(doc(db,"users",currentUser.uid),updates,{merge:true});
+
   myProfile={...myProfile,...updates};
   pendingPhoto="";
+
   $("settingsName").textContent=name;
   showStatus("profileStatus","Profile saved.");
+
   renderPeople();
   renderChats();
  } catch(error) {
@@ -408,6 +451,7 @@ $("logoutButton").addEventListener("click",async()=>{
 async function enableYupoNotifications() {
  const button=$("enableNotifications");
  button.disabled=true;
+
  showStatus("notificationStatus","Checking notification support...");
 
  try {
@@ -418,12 +462,16 @@ async function enableYupoNotifications() {
   if(!(await isSupported()))throw Error("Firebase notifications are not supported in this browser.");
 
   const permission=await Notification.requestPermission();
-  if(permission!=="granted")throw Error("Notification permission was not granted. Check Chrome site settings.");
+
+  if(permission!=="granted") {
+   throw Error("Notification permission was not granted. Check Chrome site settings.");
+  }
 
   const registration=await navigator.serviceWorker.register("./firebase-messaging-sw.js");
   await navigator.serviceWorker.ready;
 
   messaging=getMessaging(firebaseApp);
+
   const token=await getToken(messaging,{
    vapidKey:VAPID_KEY,
    serviceWorkerRegistration:registration
@@ -446,6 +494,7 @@ async function enableYupoNotifications() {
     const body=payload.notification?.body||"You have a new message.";
     showStatus("notificationStatus",title+": "+body);
    });
+
    foregroundListenerStarted=true;
   }
  } catch(error) {
@@ -511,7 +560,9 @@ onAuthStateChanged(auth,async user=>{
 
  } catch(error) {
   console.error("YUPO profile loading error:",error);
+
   showStatus("authStatus","Login succeeded, but profile loading failed: "+error.message,true);
+
   $("authScreen").classList.remove("hidden");
   $("app").classList.add("hidden");
  }
@@ -524,6 +575,7 @@ function startPeople() {
   peopleData=snapshot.docs
    .map(item=>({id:item.id,...item.data()}))
    .filter(person=>person.id!==currentUser.uid);
+
   renderPeople();
   renderChats();
  },error=>{
@@ -533,7 +585,9 @@ function startPeople() {
 
 function renderPeople() {
  if(!currentUser)return;
+
  const search=$("peopleSearch").value.trim().toLowerCase();
+
  const matches=peopleData.filter(person=>
   (person.displayName||"").toLowerCase().includes(search)||
   (person.email||"").toLowerCase().includes(search)
@@ -549,18 +603,19 @@ function renderPeople() {
  matches.forEach(person=>{
   const row=document.createElement("div");
   row.className="person";
+
   row.innerHTML=avatar(person)+
    `<div class="info"><strong>${safe(person.displayName||"YUPO user")}</strong><small>${safe(person.email||"")}</small></div><span>›</span>`;
+
   row.addEventListener("click",()=>openChat(person));
+
   $("peopleList").appendChild(row);
  });
 }
-
-$("peopleSearch").addEventListener("input",renderPeople);
+ $("peopleSearch").addEventListener("input",renderPeople);
 $("chatSearch").addEventListener("input",renderChats);
 
 function startChats() {
- 
  if(stopChats)stopChats();
 
  const q=query(
@@ -578,12 +633,23 @@ function startChats() {
 
 function renderChats() {
  if(!currentUser)return;
+
  const search=$("chatSearch").value.trim().toLowerCase();
+
  const matches=chatsData.filter(chat=>{
   const otherId=(chat.members||[]).find(id=>id!==currentUser.uid);
   const person=peopleData.find(p=>p.id===otherId);
+
   const name=(person?.displayName||person?.email||"").toLowerCase();
-  return name.includes(search)||(chat.lastMessage||"").toLowerCase().includes(search);
+  const preview=(chat.lastMessage||"").toLowerCase();
+
+  return name.includes(search)||preview.includes(search);
+ });
+
+ matches.sort((a,b)=>{
+  const aTime=a.updatedAt?.toMillis?a.updatedAt.toMillis():0;
+  const bTime=b.updatedAt?.toMillis?b.updatedAt.toMillis():0;
+  return bTime-aTime;
  });
 
  $("chatList").innerHTML="";
@@ -595,13 +661,23 @@ function renderChats() {
 
  matches.forEach(chat=>{
   const otherId=(chat.members||[]).find(id=>id!==currentUser.uid);
+
   const person=peopleData.find(p=>p.id===otherId)||{
    id:otherId,displayName:"YUPO user",email:""
   };
+
   const row=document.createElement("div");
   row.className="person";
+
+  let preview=chat.lastMessage||"Open conversation";
+
+  if(chat.lastSenderId===currentUser.uid&&chat.lastMessage) {
+   preview="You: "+preview;
+  }
+
   row.innerHTML=avatar(person)+
-   `<div class="info"><strong>${safe(person.displayName||person.email||"YUPO user")}</strong><small>${safe(chat.lastMessage||"Open conversation")}</small></div><span>›</span>`;
+   `<div class="info"><strong>${safe(person.displayName||person.email||"YUPO user")}</strong><small>${safe(preview)}</small></div><span>›</span>`;
+
   row.addEventListener("click",()=>openChat(person));
   $("chatList").appendChild(row);
  });
@@ -612,10 +688,12 @@ async function openChat(person) {
 
  selectedPerson=person;
  selectedChatId=makeChatId(currentUser.uid,person.id);
+
  $("chatScreen").classList.remove("hidden");
  $("chatTitle").textContent=person.displayName||person.email||"Conversation";
  $("chatAvatar").innerHTML=avatar(person);
  $("messages").innerHTML='<p class="muted">Loading messages...</p>';
+
  showStatus("chatStatus","");
 
  try {
@@ -627,29 +705,76 @@ async function openChat(person) {
   if(stopMessages)stopMessages();
 
   const messagesRef=collection(db,"chats",selectedChatId,"messages");
-  const messagesQuery=query(messagesRef,orderBy("createdAt","asc"),limit(200));
+
+  const messagesQuery=query(
+   messagesRef,
+   orderBy("createdAt","asc"),
+   limit(200)
+  );
 
   stopMessages=onSnapshot(messagesQuery,snapshot=>{
    $("messages").innerHTML="";
 
    snapshot.forEach(item=>{
     const message=item.data();
+    const isMine=message.senderId===currentUser.uid;
+
     const bubble=document.createElement("div");
-    bubble.className="bubble"+(message.senderId===currentUser.uid?" mine":"");
+    bubble.className="bubble"+(isMine?" mine":"");
 
     const content=document.createElement("div");
     content.textContent=message.text||"";
     bubble.appendChild(content);
 
-    const time=document.createElement("small");
-    time.textContent=message.createdAt?.toDate
+    const footer=document.createElement("small");
+
+    const time=message.createdAt?.toDate
      ?message.createdAt.toDate().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})
      :"";
-    bubble.appendChild(time);
+
+    footer.textContent=time;
+
+    if(isMine) {
+     const receipt=document.createElement("span");
+
+     receipt.className="receipt"+(message.readAt?" read":"");
+
+     receipt.textContent=message.readAt
+      ?" ✓✓ Read"
+      :message.deliveredAt
+       ?" ✓✓ Delivered"
+       :" ✓ Sent";
+
+     footer.appendChild(receipt);
+    }
+
+    bubble.appendChild(footer);
     $("messages").appendChild(bubble);
+
+    if(!isMine) {
+     const updates={};
+
+     if(!message.deliveredAt) {
+      updates.deliveredAt=serverTimestamp();
+     }
+
+     if(!message.readAt) {
+      updates.readAt=serverTimestamp();
+     }
+
+     if(Object.keys(updates).length) {
+      updateDoc(
+       doc(db,"chats",selectedChatId,"messages",item.id),
+       updates
+      ).catch(error=>{
+       console.error("Receipt update error:",error);
+      });
+     }
+    }
    });
 
    $("messages").scrollTop=$("messages").scrollHeight;
+
   },error=>{
    showStatus("chatStatus","Message error: "+error.message,true);
   });
@@ -661,8 +786,10 @@ async function openChat(person) {
 
 $("backButton").addEventListener("click",()=>{
  if(stopMessages)stopMessages();
+
  stopMessages=null;
  $("chatScreen").classList.add("hidden");
+
  selectedPerson=null;
  selectedChatId=null;
 });
@@ -671,18 +798,22 @@ $("sendForm").addEventListener("submit",async event=>{
  event.preventDefault();
 
  const text=$("messageInput").value.trim();
+
  if(!text||!selectedChatId||!selectedPerson)return;
 
  try {
   $("sendButton").disabled=true;
   showStatus("chatStatus","");
 
-  await addDoc(collection(db,"chats",selectedChatId,"messages"),{
-   text,
-   senderId:currentUser.uid,
-   senderEmail:currentUser.email||"",
-   createdAt:serverTimestamp()
-  });
+  await addDoc(
+   collection(db,"chats",selectedChatId,"messages"),
+   {
+    text,
+    senderId:currentUser.uid,
+    senderEmail:currentUser.email||"",
+    createdAt:serverTimestamp()
+   }
+  );
 
   await setDoc(doc(db,"chats",selectedChatId),{
    members:[currentUser.uid,selectedPerson.id],
@@ -692,12 +823,14 @@ $("sendForm").addEventListener("submit",async event=>{
   },{merge:true});
 
   $("messageInput").value="";
+
  } catch(error) {
   showStatus("chatStatus","Could not send message: "+error.message,true);
  } finally {
   $("sendButton").disabled=false;
  }
 });
+
 </script>
 </body>
 </html>
