@@ -274,9 +274,15 @@ function showPage(page) {
 }
 
 document.querySelectorAll(".navbtn").forEach(button=>{
- button.addEventListener("click",()=>showPage(button.dataset.page));
-});
+ button.addEventListener("click",()=>{
+  const page=button.dataset.page;
+  showPage(page);
 
+  if(page==="peoplePage"&&!peopleLoaded) {
+   startPeople();
+  }
+ });
+});
 function setAuthMode(register) {
  isRegister=register;
  $("nameField").classList.toggle("hidden",!register);
