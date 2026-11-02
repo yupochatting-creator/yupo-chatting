@@ -519,6 +519,10 @@ onAuthStateChanged(auth,async user=>{
 
  if(!user) {
   cleanup();
+
+  peopleLoaded=false;
+  peopleData=[];
+
   $("authScreen").classList.remove("hidden");
   $("app").classList.add("hidden");
   $("chatScreen").classList.add("hidden");
