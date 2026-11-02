@@ -568,8 +568,11 @@ onAuthStateChanged(auth,async user=>{
 peopleLoaded=false;
 peopleData=[];
 
-showPage("chatsPage");
-startChats();
+  peopleLoaded=false;
+  peopleData=[];
+
+  showPage("chatsPage");
+  startChats();
 
  } catch(error) {
   console.error("YUPO profile loading error:",error);
