@@ -580,13 +580,19 @@ startChats();
 function startPeople() {
  if(stopPeople)stopPeople();
 
+ if(!currentUser)return;
+
+ $("peopleList").innerHTML='<p class="muted">Loading people...</p>';
+
  stopPeople=onSnapshot(collection(db,"users"),snapshot=>{
   peopleData=snapshot.docs
    .map(item=>({id:item.id,...item.data()}))
    .filter(person=>person.id!==currentUser.uid);
 
+  peopleLoaded=true;
   renderPeople();
   renderChats();
+
  },error=>{
   $("peopleList").textContent="Could not load people: "+error.message;
  });
